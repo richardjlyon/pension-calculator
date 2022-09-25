@@ -1,0 +1,22 @@
+[app]
+key = "value"
+other_key = [ 1, 2, 3,]
+
+[basic]
+pension_age = 67
+life_expectancy = 87
+average_house_size_m2 = 67.8
+variable_unit_cost_electricity = 0.143
+variable_unit_cost_gas = 0.044
+
+[energy_use]
+leaky = 300
+old = 200
+modern = 150
+new = 100
+low = 50
+passive = 15
+
+[CAGR]
+gas = 0.05
+electricity = 0.08
