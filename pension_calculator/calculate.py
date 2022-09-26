@@ -3,6 +3,7 @@ calculate.py
 
 Calculate a pension profile.
 """
+import math
 
 import toml
 import numpy as np
@@ -35,10 +36,7 @@ def label_from_house_and_power(type: str, kwh_m2: int) -> str:
 def make_column_index() -> pd.MultiIndex:
     """Make a multi-index for the results dataframe from house and energy type."""
 
-    house_types = [
-        label_from_house_and_power(house_type, kwh_m2)
-        for house_type, kwh_m2 in config.get("energy_use").items()
-    ]
+    house_types = [house_type for house_type, _ in config.get("energy_use").items()]
     energy_types = ["gas", "electricity", "total"]
     iterables = [house_types, energy_types]
     return pd.MultiIndex.from_product(iterables, names=["house_type", "energy_type"])
@@ -65,10 +63,9 @@ def compute_costs() -> pd.DataFrame:
             cagr_elec, np.arange(years_until_death), -cost_elec_year, -cost_elec_year,
         )
 
-        label = label_from_house_and_power(house_type, kwh_m2)
-        result_df[label, "gas"] = gas_annual
-        result_df[label, "electricity"] = electricity_annual
-        result_df[label, "total"] = gas_annual + electricity_annual
+        result_df[house_type, "gas"] = gas_annual
+        result_df[house_type, "electricity"] = electricity_annual
+        result_df[house_type, "total"] = gas_annual + electricity_annual
 
     return result_df
 
@@ -78,9 +75,17 @@ def currency(x, pos):
     return "£{:1.0f}K".format(x * 1e-3)
 
 
+def round_up(number: float) -> int:
+    """Round number up for axis fomratting e.g. 388957.9 -> 400000"""
+
+    result = int(round(number, -5))
+    return result
+
+
 if __name__ == "__main__":
     df = compute_costs()
-    print(df)
+
+    max_cost = round_up(df["leaky", "total"].max())
 
     # upper panel - plot absolute energy cost
 
@@ -89,12 +94,13 @@ if __name__ == "__main__":
     plt.title("Energy cost by housing type")
 
     for house_type, kwh_m2 in config.get("energy_use").items():
-        house_type_label = label_from_house_and_power(house_type, kwh_m2)
-
-        df[house_type_label, "total"].plot(label=house_type_label)
+        df[house_type, "total"].plot(
+            label=label_from_house_and_power(house_type, kwh_m2)
+        )
 
     ax = plt.gca()
     ax.yaxis.set_major_formatter(currency)
+    ax.set_ylim([0, max_cost])
     plt.grid(
         visible=True,
         which="major",
@@ -111,16 +117,13 @@ if __name__ == "__main__":
     plt.title("Energy cost by housing type (relative to passive)")
 
     for house_type, kwh_m2 in config.get("energy_use").items():
-        house_type_label = label_from_house_and_power(house_type, kwh_m2)
-
-        if "passive" not in house_type_label:
-            energy_df = (
-                df[house_type_label, "total"] - df["passive (15 kwh/m2)", "total"]
-            )
-            energy_df.plot(label=house_type_label)
+        if house_type != "passive":
+            energy_df = df[house_type, "total"] - df["passive", "total"]
+            energy_df.plot(label=label_from_house_and_power(house_type, kwh_m2))
 
     ax = plt.gca()
     ax.yaxis.set_major_formatter(currency)
+    ax.set_ylim([0, max_cost])
     plt.grid(
         visible=True,
         which="major",
