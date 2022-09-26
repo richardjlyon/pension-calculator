@@ -10,6 +10,7 @@ import numpy_financial as npf
 import pandas as pd
 import datetime
 from matplotlib import pyplot as plt
+from matplotlib import ticker
 
 config = toml.load("app.config.toml")
 
@@ -72,8 +73,39 @@ def compute_costs() -> pd.DataFrame:
     return result_df
 
 
+def currency(x, pos):
+    """Format y axis currency label as £xxK"""
+    return "£{:1.0f}K".format(x * 1e-3)
+
+
 if __name__ == "__main__":
     df = compute_costs()
     print(df)
-    df["leaky (300 kwh/m2)", "gas"].plot()
+
+    fig, ax = plt.subplots()
+
+    fig.set_size_inches(10, 6)
+    fig.suptitle("Total energy cost by house type ", fontsize=12)
+    ax.yaxis.set_major_formatter(currency)
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["bottom"].set_visible(False)
+    ax.spines["left"].set_visible(False)
+    plt.tick_params(left=False)
+
+    for house_type, kwh_m2 in config.get("energy_use").items():
+        house_type_label = label_from_house_and_power(house_type, kwh_m2)
+
+        df[house_type_label, "total"].plot(ax=ax, label=house_type_label)
+
+    plt.grid(
+        visible=True,
+        which="major",
+        axis="y",
+        color="grey",
+        linestyle="-",
+        linewidth=0.5,
+    )
+    ax.legend(loc="upper left")
+
     plt.show()
