@@ -82,22 +82,19 @@ if __name__ == "__main__":
     df = compute_costs()
     print(df)
 
-    fig, ax = plt.subplots()
+    # upper panel - plot absolute energy cost
 
-    fig.set_size_inches(10, 6)
-    fig.suptitle("Total energy cost by house type ", fontsize=12)
-    ax.yaxis.set_major_formatter(currency)
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["bottom"].set_visible(False)
-    ax.spines["left"].set_visible(False)
-    plt.tick_params(left=False)
+    plt.figure(1)
+    plt.subplot(211)
+    plt.title("Energy cost by housing type")
 
     for house_type, kwh_m2 in config.get("energy_use").items():
         house_type_label = label_from_house_and_power(house_type, kwh_m2)
 
-        df[house_type_label, "total"].plot(ax=ax, label=house_type_label)
+        df[house_type_label, "total"].plot(label=house_type_label)
 
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(currency)
     plt.grid(
         visible=True,
         which="major",
@@ -106,6 +103,31 @@ if __name__ == "__main__":
         linestyle="-",
         linewidth=0.5,
     )
-    ax.legend(loc="upper left")
+    plt.legend(loc="upper left")
+
+    # lower panel - plot energy cost relative to passive house
+
+    plt.subplot(212)
+    plt.title("Energy cost by housing type (relative to passive)")
+
+    for house_type, kwh_m2 in config.get("energy_use").items():
+        house_type_label = label_from_house_and_power(house_type, kwh_m2)
+
+        if "passive" not in house_type_label:
+            energy_df = (
+                df[house_type_label, "total"] - df["passive (15 kwh/m2)", "total"]
+            )
+            energy_df.plot(label=house_type_label)
+
+    ax = plt.gca()
+    ax.yaxis.set_major_formatter(currency)
+    plt.grid(
+        visible=True,
+        which="major",
+        axis="y",
+        color="grey",
+        linestyle="-",
+        linewidth=0.5,
+    )
 
     plt.show()
