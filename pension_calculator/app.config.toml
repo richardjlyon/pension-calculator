@@ -1,8 +1,5 @@
-[app]
-key = "value"
-other_key = [ 1, 2, 3,]
-
 [basic]
+year_of_birth = 1965
 pension_age = 67
 life_expectancy = 87
 average_house_size_m2 = 67.8
@@ -20,3 +17,4 @@ passive = 15
 [CAGR]
 gas = 0.05
 electricity = 0.08
+
