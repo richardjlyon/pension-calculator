@@ -19,7 +19,7 @@ if __name__ == "__main__":
     )
     my_config.add_section("energy_use").set(average=133, passive=15)
     my_config.add_section("sensitivities").set(
-        price_min=0.05, price_max=0.2, cagr_min=0.05, cagr_max=0.15
+        price_min=0.05, price_max=0.31, cagr_min=0.05, cagr_max=0.10
     )
     my_config.add_section("CAGR").set(
         gas=0.05, electricity=0.08,

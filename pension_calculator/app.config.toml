@@ -12,9 +12,9 @@ passive = 15
 
 [sensitivities]
 price_min = 0.05
-price_max = 0.2
+price_max = 0.31
 cagr_min = 0.05
-cagr_max = 0.15
+cagr_max = 0.10
 
 [CAGR]
 gas = 0.05
