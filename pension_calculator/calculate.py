@@ -11,15 +11,16 @@ import numpy_financial as npf
 import pandas as pd
 import datetime
 from matplotlib import pyplot as plt
-from matplotlib import ticker
+
 
 config = toml.load("app.config.toml")
 
 year_of_birth = config.get("basic").get("year_of_birth")
-current_year = datetime.date.today().year
 life_expectancy = config.get("basic").get("life_expectancy")
-years_until_death = life_expectancy - (current_year - year_of_birth)
 years = np.arange(year_of_birth, year_of_birth + life_expectancy + 1)
+
+current_year = datetime.date.today().year
+years_until_death = life_expectancy - (current_year - year_of_birth)
 
 average_house_size_m2 = config.get("basic").get("average_house_size_m2")
 variable_unit_cost_gas = config.get("basic").get("variable_unit_cost_gas")
@@ -78,25 +79,23 @@ def currency(x, pos):
 def round_up(number: float) -> int:
     """Round number up for axis fomratting e.g. 388957.9 -> 400000"""
 
-    result = int(round(number, -5))
+    result = int(round(number, -4))
     return result
 
 
 if __name__ == "__main__":
     df = compute_costs()
 
-    max_cost = round_up(df["leaky", "total"].max())
+    max_cost = round_up(df["average", "gas"].max())
 
     # upper panel - plot absolute energy cost
 
     plt.figure(1)
     plt.subplot(211)
-    plt.title("Energy cost by housing type")
+    plt.title("Heating energy cost by housing type")
 
     for house_type, kwh_m2 in config.get("energy_use").items():
-        df[house_type, "total"].plot(
-            label=label_from_house_and_power(house_type, kwh_m2)
-        )
+        df[house_type, "gas"].plot(label=label_from_house_and_power(house_type, kwh_m2))
 
     ax = plt.gca()
     ax.yaxis.set_major_formatter(currency)
@@ -114,11 +113,11 @@ if __name__ == "__main__":
     # lower panel - plot energy cost relative to passive house
 
     plt.subplot(212)
-    plt.title("Energy cost by housing type (relative to passive)")
+    plt.title("Heating energy cost by housing type (relative to passive)")
 
     for house_type, kwh_m2 in config.get("energy_use").items():
         if house_type != "passive":
-            energy_df = df[house_type, "total"] - df["passive", "total"]
+            energy_df = df[house_type, "gas"] - df["passive", "gas"]
             energy_df.plot(label=label_from_house_and_power(house_type, kwh_m2))
 
     ax = plt.gca()

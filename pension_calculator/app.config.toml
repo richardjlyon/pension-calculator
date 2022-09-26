@@ -7,14 +7,9 @@ variable_unit_cost_electricity = 0.143
 variable_unit_cost_gas = 0.044
 
 [energy_use]
-leaky = 300
-old = 200
-modern = 150
-new = 100
-low = 50
+average = 133
 passive = 15
 
 [CAGR]
 gas = 0.05
 electricity = 0.08
-
