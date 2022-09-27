@@ -2,12 +2,12 @@
 year_of_birth = 1965
 pension_age = 67
 life_expectancy = 87
-average_house_size_m2 = 67.8
+average_house_size_m2 = 100.0
 variable_unit_cost_electricity = 0.143
 variable_unit_cost_gas = 0.044
 
 [energy_use]
-average = 133
+average = 100
 passive = 15
 
 [sensitivities]

@@ -116,8 +116,8 @@ def currency(x, pos):
 
 
 if __name__ == "__main__":
-    year_of_birth = 1997
-    house_size_m2 = 67.8
+    year_of_birth = 1965
+    house_size_m2 = 100
     result_df = compute_relative_energy_cost(year_of_birth, house_size_m2)
     delta_df = result_df["average"] - result_df["passive"]
 
@@ -153,7 +153,7 @@ if __name__ == "__main__":
         linewidth=0.5,
     )
 
-    outfile = PLOT_DIR / f"heating_cost_comparison_{year_of_birth}.png"
+    outfile = PLOT_DIR / f"heating_cost_comparison_{year_of_birth}_{house_size_m2}.png"
     plt.savefig(outfile)
 
     plt.show()
