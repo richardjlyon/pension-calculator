@@ -28,7 +28,7 @@ def compute_years_until_death(year_of_birth: Optional[int] = None) -> int:
 
     life_expectancy = config.get("basic").get("life_expectancy")
     current_year = datetime.date.today().year
-    return life_expectancy - (current_year - year_of_birth)
+    return life_expectancy - (current_year - year_of_birth) + 1
 
 
 def compute_energy_prices():
@@ -52,6 +52,29 @@ def make_column_index(energy_prices) -> pd.MultiIndex:
 def compute_annual_energy_cost(kwh_m2: float, house_size_m2: float, energy_price):
     kw_year = kwh_m2 * house_size_m2
     return kw_year * energy_price
+
+
+def compute_total_payments(
+    growth_rate: float, years: int, initial_payment: float
+) -> float:
+    """
+    Compute the total payment arising from an annual payment increasing at
+    a defined rate for a defined number of years.
+
+    Parameters
+    ----------
+    growth_rate Compound annual growth rate
+    years Number of years payments are made
+    initial_payment The payment in the first year
+
+    Returns
+    -------
+    The total amount paid
+    """
+    total = 0
+    for i in range(years):
+        total += initial_payment * pow(1.0 + growth_rate, i)
+    return total
 
 
 def compute_relative_energy_cost(
@@ -91,13 +114,8 @@ def compute_relative_energy_cost(
                 kwh_m2, house_size_m2, energy_price
             )
             total_costs = [
-                round(
-                    npf.fv(
-                        growth_rate,
-                        years_until_death,
-                        -annual_energy_cost,
-                        -annual_energy_cost,
-                    )
+                compute_total_payments(
+                    growth_rate, years_until_death, annual_energy_cost
                 )
                 for growth_rate in growth_rates
             ]
@@ -157,3 +175,8 @@ if __name__ == "__main__":
     plt.savefig(outfile)
 
     plt.show()
+
+    print(result_df["average", 0.05].head())
+    print(result_df["passive", 0.05].head())
+
+    print(delta_df)
