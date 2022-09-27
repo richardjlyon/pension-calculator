@@ -109,11 +109,14 @@ def compute_relative_energy_cost(
 
 def currency(x, pos):
     """Format y axis currency label as £xxK"""
-    return "£{:1.0f}K".format(x * 1e-3)
+    if x >= 1e6:
+        return "£{:1.1f}M".format(x * 1e-6)
+    else:
+        return "£{:1.0f}K".format(x * 1e-3)
 
 
 if __name__ == "__main__":
-    year_of_birth = 1965
+    year_of_birth = 1997
     house_size_m2 = 67.8
     result_df = compute_relative_energy_cost(year_of_birth, house_size_m2)
     delta_df = result_df["average"] - result_df["passive"]
@@ -121,13 +124,17 @@ if __name__ == "__main__":
     fig, ax = plt.subplots()
     ax.yaxis.set_major_formatter(currency)
 
-    fig.set_size_inches(10, 6)
-    fig.suptitle("Heating cost of an 'average' house relative to Passive House")
+    width_inches = 10
+    height_inches = width_inches * 9 / 16
+    fig.set_size_inches(width_inches, height_inches)
+    fig.suptitle(
+        "Lifetime heating energy cost of an 'average' house relative to Passive House"
+    )
 
     delta_df.plot(ax=ax)
 
     plt.legend(
-        title="Energy price (p/kWh)",
+        title="Energy variable unit cost (p/kWh)",
         labels=[round(col, 2) * 100 for col in delta_df.columns],
     )
     ax.set_xlabel("Energy price Compound Annual Growth Rate")
@@ -146,7 +153,7 @@ if __name__ == "__main__":
         linewidth=0.5,
     )
 
-    outfile = PLOT_DIR / "heating_cost_comparison.png"
+    outfile = PLOT_DIR / f"heating_cost_comparison_{year_of_birth}.png"
     plt.savefig(outfile)
 
     plt.show()
