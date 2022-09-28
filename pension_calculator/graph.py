@@ -40,7 +40,8 @@ def compute_energy_prices():
 def compute_growth_rates():
     cagr_min = config.get("sensitivities").get("cagr_min")
     cagr_max = config.get("sensitivities").get("cagr_max")
-    return np.arange(cagr_min, cagr_max + 0.01, 0.005)
+    rates = np.arange(cagr_min, cagr_max + 0.001, 0.005)
+    return np.round(rates, 3)
 
 
 def make_column_index(energy_prices) -> pd.MultiIndex:
@@ -133,11 +134,30 @@ def currency(x, pos):
         return "£{:1.0f}K".format(x * 1e-3)
 
 
+def print_sanity_check(result_df, delta_df, year_of_birth, year_of_death):
+
+    print("\nSanity check:")
+    print("======================")
+    print(f"Date range: {year_of_birth} - {year_of_death}")
+    print(
+        f"price: 0.05, CAGR: 0.05, average: {round(result_df['average', 0.05][0.05])}, passive: {round(result_df['passive', 0.05][0.05])}, difference: {round(delta_df[0.05][0.05])}\n"
+        f"price: 0.05, CAGR: 0.10, average: {round(result_df['average', 0.10][0.05])}, passive: {round(result_df['passive', 0.10][0.05])}, difference: {round(delta_df[0.10][0.05])}\n"
+        f"price: 0.20, CAGR: 0.05, average: {round(result_df['average', 0.20][0.05])}, passive: {round(result_df['passive', 0.20][0.05])}, difference: {round(delta_df[0.20][0.05])}\n"
+        f"price: 0.20, CAGR: 0.10, average: {round(result_df['average', 0.20][0.1])}, passive: {round(result_df['passive', 0.20][0.1])}, difference: {round(delta_df[0.20][0.1])}\n"
+    )
+
+
 if __name__ == "__main__":
-    year_of_birth = 1965
+
+    year_of_birth = 1997
+    year_of_death = year_of_birth + config.get("basic").get("life_expectancy")
+    current_year = datetime.date.today().year
     house_size_m2 = 100
+
     result_df = compute_relative_energy_cost(year_of_birth, house_size_m2)
     delta_df = result_df["average"] - result_df["passive"]
+
+    print_sanity_check(result_df, delta_df, year_of_birth, year_of_death)
 
     fig, ax = plt.subplots()
     ax.yaxis.set_major_formatter(currency)
@@ -146,7 +166,7 @@ if __name__ == "__main__":
     height_inches = width_inches * 9 / 16
     fig.set_size_inches(width_inches, height_inches)
     fig.suptitle(
-        "Lifetime heating energy cost of an 'average' house relative to Passive House"
+        f"Additional heating energy cost of an 'average' house relative to Passive House ({current_year}-{year_of_death})"
     )
 
     delta_df.plot(ax=ax)
@@ -175,8 +195,3 @@ if __name__ == "__main__":
     plt.savefig(outfile)
 
     plt.show()
-
-    print(result_df["average", 0.05].head())
-    print(result_df["passive", 0.05].head())
-
-    print(delta_df)
