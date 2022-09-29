@@ -72,11 +72,9 @@ def compute_total_payments(
     -------
     The total amount paid
     """
-    total = initial_payment
-    new_payment = total
-    for i in range(years - 1):
-        new_payment = new_payment * (1 + growth_rate)
-        total += new_payment
+    total = 0
+    for i in range(years):
+        total += initial_payment * pow(1 + growth_rate, i)
     return total
 
 
