@@ -34,7 +34,7 @@ def compute_energy_prices():
     price_min = config.get("sensitivities").get("price_min")
     price_max = config.get("sensitivities").get("price_max")
     prices = np.arange(price_min, price_max, 0.05)
-    return np.round(prices, 3)
+    return np.round(prices, 3)[::-1]
 
 
 def compute_growth_rates():
