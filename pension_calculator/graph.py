@@ -8,13 +8,12 @@ energy price and compound annual growth rate/.
 import datetime
 from typing import Optional
 
-import toml
-
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import numpy_financial as npf
-import matplotlib.pyplot as plt
+import toml
 from matplotlib.offsetbox import AnchoredText
+
 from pension_calculator import ROOT
 
 PLOT_DIR = ROOT / "plots"
@@ -34,7 +33,8 @@ def compute_years_until_death(year_of_birth: Optional[int] = None) -> int:
 def compute_energy_prices():
     price_min = config.get("sensitivities").get("price_min")
     price_max = config.get("sensitivities").get("price_max")
-    return np.arange(price_min, price_max, 0.05)
+    prices = np.arange(price_min, price_max, 0.05)
+    return np.round(prices, 3)
 
 
 def compute_growth_rates():
@@ -72,9 +72,11 @@ def compute_total_payments(
     -------
     The total amount paid
     """
-    total = 0
-    for i in range(years):
-        total += initial_payment * pow(1.0 + growth_rate, i)
+    total = initial_payment
+    new_payment = total
+    for i in range(years - 1):
+        new_payment = new_payment * (1 + growth_rate)
+        total += new_payment
     return total
 
 
@@ -134,22 +136,39 @@ def currency(x, pos):
         return "£{:1.0f}K".format(x * 1e-3)
 
 
-def print_sanity_check(result_df, delta_df, year_of_birth, year_of_death):
+def print_sanity_check(
+    result_df, delta_df, year_of_birth, year_of_death, house_size_m2
+):
 
     print("\nSanity check:")
     print("======================")
-    print(f"Date range: {year_of_birth} - {year_of_death}")
+    print(f"Year of birth      : {year_of_birth}")
     print(
-        f"price: 0.05, CAGR: 0.05, average: {round(result_df['average', 0.05][0.05])}, passive: {round(result_df['passive', 0.05][0.05])}, difference: {round(delta_df[0.05][0.05])}\n"
-        f"price: 0.05, CAGR: 0.10, average: {round(result_df['average', 0.10][0.05])}, passive: {round(result_df['passive', 0.10][0.05])}, difference: {round(delta_df[0.10][0.05])}\n"
-        f"price: 0.20, CAGR: 0.05, average: {round(result_df['average', 0.20][0.05])}, passive: {round(result_df['passive', 0.20][0.05])}, difference: {round(delta_df[0.20][0.05])}\n"
-        f"price: 0.20, CAGR: 0.10, average: {round(result_df['average', 0.20][0.1])}, passive: {round(result_df['passive', 0.20][0.1])}, difference: {round(delta_df[0.20][0.1])}\n"
+        f"Year of retirement : {year_of_birth + config.get('basic').get('pension_age')}"
     )
+    print(f"Year of death      : {year_of_death}")
+    print(f"House size         : {house_size_m2}m2\n")
+
+    samples = [
+        {"CAGR": 0.05, "price": 0.05},
+        {"CAGR": 0.10, "price": 0.05},
+        {"CAGR": 0.05, "price": 0.20},
+        {"CAGR": 0.10, "price": 0.20},
+    ]
+
+    for sample in samples:
+        cagr = sample["CAGR"]
+        price = sample["price"]
+        print(
+            f"price: {price:.2f} |  CAGR: {cagr:.2f} | average: {round(result_df['average', price][cagr]):>7} | passive: {round(result_df['passive', price][cagr]):>7} | difference: {round(delta_df[price][cagr]):>7}"
+        )
+
+    return
 
 
 if __name__ == "__main__":
 
-    year_of_birth = 1997
+    year_of_birth = 1955
     year_of_death = year_of_birth + config.get("basic").get("life_expectancy")
     current_year = datetime.date.today().year
     house_size_m2 = 100
@@ -157,7 +176,7 @@ if __name__ == "__main__":
     result_df = compute_relative_energy_cost(year_of_birth, house_size_m2)
     delta_df = result_df["average"] - result_df["passive"]
 
-    print_sanity_check(result_df, delta_df, year_of_birth, year_of_death)
+    print_sanity_check(result_df, delta_df, year_of_birth, year_of_death, house_size_m2)
 
     fig, ax = plt.subplots()
     ax.yaxis.set_major_formatter(currency)
@@ -195,3 +214,5 @@ if __name__ == "__main__":
     plt.savefig(outfile)
 
     plt.show()
+
+    print(f"\nSaved file to {outfile}")
