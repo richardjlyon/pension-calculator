@@ -64,3 +64,7 @@ class Energy:
         ]
 
         return pd.Series(data=payments, index=range(years))
+
+    def retirement_cost(self) -> float:
+        """Compute the total cost of energy from retirement to death."""
+        pass
