@@ -4,6 +4,7 @@ energy.py
 Richard Lyon
 3 October 2022
 """
+from dataclasses import dataclass
 
 import pandas as pd
 import toml
@@ -13,22 +14,13 @@ from pension_calculator import ROOT
 config = toml.load(f"{ROOT}/app.config.toml")
 
 
+@dataclass
 class Energy:
     """Represents an energy type. Computes cost time series."""
 
-    def __init__(self, tariff: float, cagr: float = 0, energy_type: str = None):
-        """
-        Initialise an Energy object
-
-        Parameters
-        ----------
-        energy_type The type of energy e.g. "electricity"
-        tariff Energy price (£/kWh)
-        cagr Compound Annual Growth Rate percentage e.g. 0.1
-        """
-        self.tariff: float = tariff
-        self.cagr: float = cagr
-        self.energy_type: str = energy_type  #
+    tariff: float
+    cagr: float
+    energy_type: str = None
 
     def annual_energy_cost(self, kwh_m2: float, house_size_m2: float):
         """
