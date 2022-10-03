@@ -1,10 +1,10 @@
-from pension_calculator.graph import (
-    compute_relative_energy_cost,
-    compute_annual_energy_cost,
-)
 import numpy as np
 import pytest
 
+from pension_calculator.energy import (
+    compute_annual_energy_cost,
+    compute_relative_energy_cost,
+)
 
 energy_prices = np.linspace(0.05, 0.2, 16)
 
