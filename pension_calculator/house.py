@@ -6,7 +6,6 @@ Richard Lyon
 """
 import datetime
 from dataclasses import dataclass
-from moneyed import Money, GBP
 
 
 @dataclass
@@ -14,10 +13,10 @@ class House:
     """Represents a house with a mortgage and energy bills."""
 
     purchase_date: datetime.datetime
-    purchase_cost: Money
+    purchase_cost: float
     passive_house_premium: float
     area_m2: float
 
-    def total_cost(self) -> Money:
+    def total_cost(self) -> float:
         """Compute the total cost of the house."""
         return self.purchase_cost * (1 + self.passive_house_premium)
