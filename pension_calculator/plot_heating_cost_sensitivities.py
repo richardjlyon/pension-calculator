@@ -6,125 +6,18 @@ energy price and compound annual growth rate/.
 """
 
 import datetime
-from typing import Optional
 
 import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 import toml
 from matplotlib.offsetbox import AnchoredText
 import matplotlib.ticker as mtick
 
 from pension_calculator import ROOT
+from pension_calculator.energy import compute_relative_energy_cost
 
 PLOT_DIR = ROOT / "plots"
 
 config = toml.load(f"{ROOT}/app.config.toml")
-
-
-def compute_years_until_death(year_of_birth: Optional[int] = None) -> int:
-    if year_of_birth is None:
-        year_of_birth = config.get("basic").get("year_of_birth")
-
-    life_expectancy = config.get("basic").get("life_expectancy")
-    current_year = datetime.date.today().year
-    return life_expectancy - (current_year - year_of_birth) + 1
-
-
-def compute_energy_prices():
-    price_min = config.get("sensitivities").get("price_min")
-    price_max = config.get("sensitivities").get("price_max")
-    prices = np.arange(price_min, price_max, 0.05)
-    return np.round(prices, 3)[::-1]
-
-
-def compute_growth_rates():
-    cagr_min = config.get("sensitivities").get("cagr_min")
-    cagr_max = config.get("sensitivities").get("cagr_max")
-    rates = np.arange(cagr_min, cagr_max + 0.001, 0.005)
-    return np.round(rates, 3)
-
-
-def make_column_index(energy_prices) -> pd.MultiIndex:
-    house_types = [house_type for house_type, _ in config.get("energy_use").items()]
-    iterables = [house_types, energy_prices]
-    return pd.MultiIndex.from_product(iterables, names=["house_type", "energy_price"])
-
-
-def compute_annual_energy_cost(kwh_m2: float, house_size_m2: float, energy_price):
-    kw_year = kwh_m2 * house_size_m2
-    return kw_year * energy_price
-
-
-def compute_total_payments(
-    growth_rate: float, years: int, initial_payment: float
-) -> float:
-    """
-    Compute the total payment arising from an annual payment increasing at
-    a defined rate for a defined number of years.
-
-    Parameters
-    ----------
-    growth_rate Compound annual growth rate
-    years Number of years payments are made
-    initial_payment The payment in the first year
-
-    Returns
-    -------
-    The total amount paid
-    """
-    total = 0
-    for i in range(years):
-        total += initial_payment * pow(1 + growth_rate, i)
-    return total
-
-
-def compute_relative_energy_cost(
-    year_of_birth: Optional[int] = None, house_size_m2: Optional[float] = None
-) -> pd.DataFrame:
-    """
-    Compute the heating energy cost of an "average" house relative to a passive house for a range of
-    energy prices and compound annual growth rates.
-
-    The energy cost is computed from the energy intensity of the house and the area. Energy cost is inflated from the
-    year the script is run until the year of death computed from the year of birth.
-
-    Parameters
-    ----------
-    year_of_birth The year of birth to compute year of death from (default set from config file)
-    house_size_m2 The size of the house in square metres (default set from config file)
-
-    Returns
-    -------
-    A dataframe of energy costs
-    """
-
-    if house_size_m2 is None:
-        house_size_m2 = config.get("basic").get("average_house_size_m2")
-
-    years_until_death = compute_years_until_death(year_of_birth)
-    energy_prices = compute_energy_prices()
-    growth_rates = compute_growth_rates()
-
-    df = pd.DataFrame(index=growth_rates, columns=make_column_index(energy_prices))
-
-    for house_type, kwh_m2 in config.get("energy_use").items():
-
-        for energy_price in energy_prices:
-
-            annual_energy_cost = compute_annual_energy_cost(
-                kwh_m2, house_size_m2, energy_price
-            )
-            total_costs = [
-                compute_total_payments(
-                    growth_rate, years_until_death, annual_energy_cost
-                )
-                for growth_rate in growth_rates
-            ]
-
-            df[house_type, energy_price] = total_costs
-
-    return df
 
 
 def currency(x, pos):
