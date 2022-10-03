@@ -1,6 +1,6 @@
 import datetime
 
-from pension_calculator.house import House
+from pension_calculator.models.house import House
 
 
 def test_init():

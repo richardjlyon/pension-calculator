@@ -16,10 +16,10 @@ from matplotlib.offsetbox import AnchoredText
 import matplotlib.ticker as mtick
 
 from pension_calculator import ROOT
-from pension_calculator.energy import Energy
-from pension_calculator.person import Person
+from pension_calculator.models.energy import Energy
+from pension_calculator.models.person import Person
 
-PLOT_DIR = ROOT / "plots"
+PLOT_DIR = ROOT / "plots" / "figures"
 
 config = toml.load(f"{ROOT}/app.config.toml")
 current_year = datetime.date.today().year

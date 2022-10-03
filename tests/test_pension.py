@@ -1,6 +1,6 @@
 from pytest import approx
 
-from pension_calculator.pension import Pension
+from pension_calculator.models.pension import Pension
 
 
 def test_annual_payments():

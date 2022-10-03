@@ -1,4 +1,4 @@
-from pension_calculator.mortgage import Mortgage
+from pension_calculator.models.mortgage import Mortgage
 from pytest import approx
 
 

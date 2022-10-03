@@ -1,7 +1,6 @@
-import numpy as np
 from pytest import approx
 
-from pension_calculator.energy import Energy
+from pension_calculator.models.energy import Energy
 
 KWH_M2 = 100
 HOUSE_SIZE_M2 = 100

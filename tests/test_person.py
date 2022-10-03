@@ -1,7 +1,7 @@
 import toml
 
 from pension_calculator import ROOT
-from pension_calculator.person import Person
+from pension_calculator.models.person import Person
 
 config = toml.load(f"{ROOT}/app.config.toml")
 PENSION_AGE = 67
