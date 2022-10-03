@@ -14,7 +14,6 @@ import toml
 
 from pension_calculator import ROOT
 from pension_calculator.utils import compute_total_payments
-from pension_calculator.person import compute_years_until_death
 
 config = toml.load(f"{ROOT}/app.config.toml")
 
@@ -83,7 +82,7 @@ def make_column_index(energy_prices) -> pd.MultiIndex:
 
 
 def compute_relative_energy_cost(
-    year_of_birth: Optional[int] = None, house_size_m2: Optional[float] = None
+    years_until_death: int, house_size_m2: Optional[float] = None
 ) -> pd.DataFrame:
     """
     Compute the heating energy cost of an "average" house relative to a passive house for a range of
@@ -105,7 +104,6 @@ def compute_relative_energy_cost(
     if house_size_m2 is None:
         house_size_m2 = config.get("basic").get("average_house_size_m2")
 
-    years_until_death = compute_years_until_death(year_of_birth)
     energy_prices = compute_energy_prices()
     growth_rates = compute_energy_growth_rates()
 

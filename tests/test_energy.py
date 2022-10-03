@@ -29,9 +29,9 @@ def test_compute_annual_energy_cost():
     ],
 )
 def test_compute_relative_energy_cost(cagr, price, average, passive, difference):
-    year_of_birth = 1955
+    life_expectancy = 21
     house_size_m2 = 100
-    result_df = compute_relative_energy_cost(year_of_birth, house_size_m2)
+    result_df = compute_relative_energy_cost(life_expectancy, house_size_m2)
     delta_df = result_df["average"] - result_df["passive"]
 
     assert round(result_df["average", price][cagr]) == average

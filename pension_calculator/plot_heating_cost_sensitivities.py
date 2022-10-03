@@ -8,16 +8,19 @@ energy price and compound annual growth rate/.
 import datetime
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import toml
 from matplotlib.offsetbox import AnchoredText
 import matplotlib.ticker as mtick
 
 from pension_calculator import ROOT
 from pension_calculator.energy import compute_relative_energy_cost
+from pension_calculator.person import Person
 
 PLOT_DIR = ROOT / "plots"
 
 config = toml.load(f"{ROOT}/app.config.toml")
+current_year = datetime.date.today().year
 
 
 def currency(x, pos):
@@ -28,17 +31,13 @@ def currency(x, pos):
         return "£{:1.0f}K".format(x * 1e-3)
 
 
-def print_sanity_check(
-    result_df, delta_df, year_of_birth, year_of_death, house_size_m2
-):
+def print_sanity_check(result_df, delta_df, house_size_m2, person: Person):
 
     print("\nSanity check:")
     print("======================")
-    print(f"Year of birth      : {year_of_birth}")
-    print(
-        f"Year of retirement : {year_of_birth + config.get('basic').get('pension_age')}"
-    )
-    print(f"Year of death      : {year_of_death}")
+    print(f"Year of birth      : {person.yob}")
+    print(f"Year of retirement : {person.yob + config.get('basic').get('pension_age')}")
+    print(f"Year of death      : {person.yod}")
     print(f"House size         : {house_size_m2}m2\n")
 
     samples = [
@@ -58,14 +57,14 @@ def print_sanity_check(
     return
 
 
-def plot_single(delta_df):
+def plot_single(delta_df: pd.DataFrame, person: Person):
     fig, ax = plt.subplots()
     ax.yaxis.set_major_formatter(currency)
     width_inches = 10
     height_inches = width_inches * 9 / 16
     fig.set_size_inches(width_inches, height_inches)
     fig.suptitle(
-        f"Additional heating energy cost of an 'average' house relative to Passive House ({current_year}-{year_of_death})"
+        f"Additional heating energy cost of an 'average' house relative to Passive House ({current_year}-{person.yod})"
     )
     delta_df.plot(ax=ax)
     plt.legend(
@@ -73,7 +72,7 @@ def plot_single(delta_df):
         labels=[round(col, 2) * 100 for col in delta_df.columns],
     )
     ax.set_xlabel("Energy price Compound Annual Growth Rate")
-    text = f"Year of birth: {year_of_birth}\nHouse size: {house_size_m2}m2"
+    text = f"Year of birth: {person.yod}\nHouse size: {house_size_m2}m2"
     at = AnchoredText(text, prop=dict(size=15), frameon=True, loc="upper center")
     at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
     ax.add_artist(at)
@@ -85,13 +84,13 @@ def plot_single(delta_df):
         linestyle="-",
         linewidth=0.5,
     )
-    outfile = PLOT_DIR / f"heating_cost_comparison_{year_of_birth}_{house_size_m2}.png"
+    outfile = PLOT_DIR / f"heating_cost_comparison_{person.yob}_{house_size_m2}.png"
     plt.savefig(outfile)
     plt.show()
     print(f"\nSaved file to {outfile}")
 
 
-def plot_4_panel(result_df, house_size_m2, year_of_birth, current_year, year_of_death):
+def plot_4_panel(result_df, house_size_m2, person):
 
     max_cost = result_df["average"].max(axis=1).max()
 
@@ -101,7 +100,7 @@ def plot_4_panel(result_df, house_size_m2, year_of_birth, current_year, year_of_
     fig.set_size_inches(width_inches, height_inches)
     fig.patch.set_facecolor("white")
     fig.suptitle(
-        f"Additional heating energy cost of an 'average' house relative to Passive House ({current_year}-{year_of_death})",
+        f"Additional heating energy cost of an 'average' house relative to Passive House ({current_year}-{person.yod})",
         fontsize=12,
     )
 
@@ -149,7 +148,7 @@ def plot_4_panel(result_df, house_size_m2, year_of_birth, current_year, year_of_
     )
 
     ax1.annotate(
-        f"Year Of Birth: {year_of_birth}",
+        f"Year Of Birth: {person.yob}",
         (0, 0),
         (20, 160),
         xycoords="axes points",
@@ -167,8 +166,7 @@ def plot_4_panel(result_df, house_size_m2, year_of_birth, current_year, year_of_
     )
 
     outfile = (
-        PLOT_DIR
-        / f"heating_cost_comparison_4_panel_{year_of_birth}_{house_size_m2}.png"
+        PLOT_DIR / f"heating_cost_comparison_4_panel_{person.yob}_{house_size_m2}.png"
     )
     plt.savefig(outfile)
     plt.show()
@@ -177,15 +175,14 @@ def plot_4_panel(result_df, house_size_m2, year_of_birth, current_year, year_of_
 
 if __name__ == "__main__":
 
-    year_of_birth = 1997
-    year_of_death = year_of_birth + config.get("basic").get("life_expectancy")
-    current_year = datetime.date.today().year
+    person = Person(1997)
+
     house_size_m2 = 100
 
-    result_df = compute_relative_energy_cost(year_of_birth, house_size_m2)
+    result_df = compute_relative_energy_cost(person.years_until_death(), house_size_m2)
     delta_df = result_df["average"] - result_df["passive"]
 
-    print_sanity_check(result_df, delta_df, year_of_birth, year_of_death, house_size_m2)
+    print_sanity_check(result_df, delta_df, house_size_m2, person)
 
-    plot_single(delta_df)
-    plot_4_panel(result_df, house_size_m2, year_of_birth, current_year, year_of_death)
+    plot_single(delta_df, person)
+    plot_4_panel(result_df, house_size_m2, person)

@@ -6,6 +6,7 @@ Richard Lyon
 """
 
 import datetime
+from dataclasses import dataclass, field
 from typing import Optional
 
 import toml
@@ -13,24 +14,35 @@ import toml
 from pension_calculator import ROOT
 
 config = toml.load(f"{ROOT}/app.config.toml")
+pension_age = config.get("basic").get("pension_age")
+life_expectancy = config.get("basic").get("life_expectancy")
 
 
-def compute_years_until_death(year_of_birth: Optional[int] = None) -> int:
-    """
-    Compute the number of years until death from the current year for a person's year of birth.
+@dataclass
+class Person:
+    """Represents a person who owns a house and a pension."""
 
-    Parameters
-    ----------
-    year_of_birth The year of birth
+    yob: int
+    yor: int = field(init=False)
+    yod: int = field(init=False)
 
-    Returns
-    -------
-    The number of years until death
+    def __post_init__(self):
 
-    """
-    if year_of_birth is None:
-        year_of_birth = config.get("basic").get("year_of_birth")
+        self.yor = self.yob + pension_age
+        self.yod = self.yob + life_expectancy
 
-    life_expectancy = config.get("basic").get("life_expectancy")
-    current_year = datetime.date.today().year
-    return life_expectancy - (current_year - year_of_birth) + 1
+    def years_until_death(self) -> int:
+        """
+        Compute the number of years until death from the current year for a person's year of birth.
+
+        Parameters
+        ----------
+        year_of_birth The year of birth
+
+        Returns
+        -------
+        The number of years until death
+
+        """
+        current_year = datetime.date.today().year
+        return life_expectancy - (current_year - self.yob) + 1
