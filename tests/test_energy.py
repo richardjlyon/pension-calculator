@@ -1,24 +1,31 @@
 from pytest import approx
 
-from pension_calculator.models.energy import Energy
-
 
 def test_annual_energy_cost(energy):
-    assert energy.annual_energy_cost(kwh_m2=100, house_size_m2=100) == 1000
+    assert energy.annual_energy_cost(kwh_m2=100, house_size_m2=100) == 500
 
 
 def test_annual_payments(energy):
-    yearly_payments = energy.annual_payments(years=10, kwh_m2=100, house_size_m2=100)
-    expected_total = 15937.42  # see Numbers document
+    annual_payments = energy.annual_payments(
+        kwh_m2=100, house_size_m2=100, starting_year=2022, year_of_death=2052
+    )
+    expected_total = 35380  # see Numbers document
 
-    assert yearly_payments.sum() == approx(expected_total)
+    assert annual_payments.sum() == approx(expected_total, abs=1)
 
 
 def test_retirement_cost(energy):
-    retirement_cost = energy.retirement_cost()
-    expected_total = 0
+    retirement_cost = energy.retirement_cost(
+        kwh_m2=100,
+        house_size_m2=100,
+        starting_year=2022,
+        year_of_retirement=2032,
+        year_of_death=2052,
+    )
 
-    # assert retirement_cost == approx(expected_total)
+    expected_total = 29091  # see Numbers document
+
+    assert retirement_cost == approx(expected_total, abs=1)
 
 
 # @pytest.mark.parametrize(
