@@ -16,6 +16,7 @@ class House:
     purchase_cost: float
     passive_house_premium: float
     area_m2: float
+    annual_heating_kwh_m2a: float
 
     def total_cost(self) -> float:
         """Compute the total cost of the house."""
