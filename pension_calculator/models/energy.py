@@ -20,7 +20,8 @@ class Energy:
 
     tariff: float
     cagr: float
-    energy_type: str = None
+    year_of_retirement: int
+    year_of_death: int
 
     def annual_energy_cost(self, kwh_m2: float, house_size_m2: float):
         """
