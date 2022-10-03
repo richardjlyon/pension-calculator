@@ -114,7 +114,7 @@ def compute_relative_energy_cost(
                 annual_payments = energy.annual_payments(
                     years=years_until_death, kwh_m2=kwh_m2, house_size_m2=house_size_m2
                 )
-                total_payments.append(annual_payments["payment"].sum())
+                total_payments.append(annual_payments.sum())
 
             df[house_type, energy_price] = total_payments
 

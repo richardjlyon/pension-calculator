@@ -49,7 +49,7 @@ class Energy:
 
     def annual_payments(
         self, years: int, kwh_m2: float, house_size_m2: float
-    ) -> pd.DataFrame:
+    ) -> pd.Series:
         """
         Compute a time series of annual energy payments for a given house size and number of years.
 
@@ -60,7 +60,7 @@ class Energy:
 
         Returns
         -------
-        A dataframe containing the annual payments.
+        A dataframe containing the annual payments time series.
 
         """
 
@@ -71,4 +71,4 @@ class Energy:
             initial_payment * pow(1 + self.cagr, period) for period in range(years)
         ]
 
-        return pd.DataFrame(data=payments, index=range(years), columns=["payment"])
+        return pd.Series(data=payments, index=range(years))

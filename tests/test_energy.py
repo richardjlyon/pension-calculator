@@ -24,7 +24,7 @@ def test_annual_payments():
         years=YEARS, kwh_m2=KWH_M2, house_size_m2=HOUSE_SIZE_M2
     )
 
-    assert yearly_payments["payment"].sum() == approx(EXPECTED_TOTAL)
+    assert yearly_payments.sum() == approx(EXPECTED_TOTAL)
 
 
 # @pytest.mark.parametrize(
