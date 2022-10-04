@@ -95,3 +95,8 @@ class Mortgage:
         )
 
         return df
+
+    @property
+    def final_year(self) -> int:
+        """Return the final payment year."""
+        return self.purchase_year + self.length_years - 1
