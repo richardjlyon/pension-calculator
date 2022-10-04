@@ -63,6 +63,16 @@ def compute_payment_schedule(p: ScenarioParams) -> pd.DataFrame:
         length_years=p.mortgage_length_years,
     )
 
+    if mortgage.final_year >= person.yod:
+        raise AttributeError(
+            f"Person dies before mortgage paid ({person.yod} vs. {mortgage.final_year})"
+        )
+
+    if mortgage.final_year >= person.yor:
+        raise AttributeError(
+            f"Person retires before mortgage paid ({person.yor} vs. {mortgage.final_year})"
+        )
+
     energy = Energy(tariff=p.energy_tariff, cagr=p.energy_cagr)
 
     retirement_heating_cost = energy.retirement_cost(
@@ -90,11 +100,11 @@ def compute_payment_schedule(p: ScenarioParams) -> pd.DataFrame:
     annual_pension_payments = pension.annual_payments()
 
     # print()
-    # print(annual_energy_payments)
+    # print(annual_mortgage_payments)
 
     df = pd.DataFrame(
         data={
-            "energy": annual_energy_payments,
+            "heating": annual_energy_payments,
             "mortgage": annual_mortgage_payments,
             "pension": annual_pension_payments,
         },

@@ -32,7 +32,7 @@ def mortgage():
 @pytest.fixture(scope="module")
 def payment_schedule():
     params = ScenarioParams(
-        person_year_of_birth=1965,
+        person_year_of_birth=1997,
         house_purchase_year=2022,
         house_purchase_cost=350000 / 1.1,
         house_passive_house_premium=0.1,
