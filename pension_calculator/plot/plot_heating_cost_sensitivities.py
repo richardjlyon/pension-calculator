@@ -6,121 +6,20 @@ energy price and compound annual growth rate/.
 """
 
 import datetime
-from typing import Optional
 
 import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-import toml
-from matplotlib.offsetbox import AnchoredText
 import matplotlib.ticker as mtick
+import toml
 
-from pension_calculator import ROOT
-from pension_calculator.models.energy import Energy
+from pension_calculator import PLOT_DIR, CONFIG
+from pension_calculator.compute.compute_heating_cost_sensitivities import (
+    compute_heating_cost_sensitivities,
+)
 from pension_calculator.models.person import Person
+from pension_calculator.plot.utils import currency
 
-PLOT_DIR = ROOT / "plot" / "figures"
 
-config = toml.load(f"{ROOT}/app.config.toml")
 current_year = datetime.date.today().year
-
-
-def currency(x, pos):
-    """Format y axis currency label as £xxK"""
-    if x >= 1e6:
-        return "£{:1.1f}M".format(x * 1e-6)
-    else:
-        return "£{:1.0f}K".format(x * 1e-3)
-
-
-def compute_energy_prices():
-    """
-    Generate an array of energy prices from minimum and maximum prices specified in a config file.
-    Returns
-    -------
-    An array of energy prices
-    """
-    price_min = config.get("sensitivities").get("price_min")
-    price_max = config.get("sensitivities").get("price_max")
-    prices = np.arange(price_min, price_max, 0.05)
-    return np.round(prices, 3)[::-1]
-
-
-def compute_energy_growth_rates():
-    """
-    Generate an array of energy growth rates from minimum and maximum rates specified in a config file.
-    Returns
-    -------
-    An array of growth rates
-    """
-    cagr_min = config.get("sensitivities").get("cagr_min")
-    cagr_max = config.get("sensitivities").get("cagr_max")
-    rates = np.arange(cagr_min, cagr_max + 0.001, 0.005)
-    return np.round(rates, 3)
-
-
-def make_column_index(energy_prices) -> pd.MultiIndex:
-    """
-    Create the multi-index for a dataframe of energy prices
-
-    Parameters
-    ----------
-    energy_prices An array of energy prices
-
-    Returns
-    -------
-    A multi-index ["house type", energy_price]
-
-    """
-    house_types = [house_type for house_type, _ in config.get("energy_use").items()]
-    iterables = [house_types, energy_prices]
-    return pd.MultiIndex.from_product(iterables, names=["house_type", "energy_price"])
-
-
-def compute_relative_energy_cost(
-    years_until_death: int, house_size_m2: Optional[float] = None
-) -> pd.DataFrame:
-    """
-    Compute the heating energy cost of an "average" house relative to a passive house for a range of
-    energy prices and compound annual growth rates.
-
-    The energy cost is computed from the energy intensity of the house and the area. Energy cost is inflated from the
-    year the script is run until the year of death computed from the year of birth.
-
-    Parameters
-    ----------
-    year_of_birth The year of birth to compute year of death from (default set from config file)
-    house_area_m2 The size of the house in square metres (default set from config file)
-
-    Returns
-    -------
-    A dataframe of energy costs
-    """
-
-    if house_size_m2 is None:
-        house_size_m2 = config.get("basic").get("average_house_size_m2")
-
-    energy_prices = compute_energy_prices()
-    growth_rates = compute_energy_growth_rates()
-
-    df = pd.DataFrame(index=growth_rates, columns=make_column_index(energy_prices))
-
-    for house_type, kwh_m2 in config.get("energy_use").items():
-        for energy_price in energy_prices:
-            total_payments = []
-            for growth_rate in growth_rates:
-
-                energy = Energy(tariff=energy_price, cagr=growth_rate)
-                annual_payments = energy.annual_payments(
-                    years=years_until_death,
-                    house_kwh_m2a=kwh_m2,
-                    house_area_m2=house_size_m2,
-                )
-                total_payments.append(annual_payments.sum())
-
-            df[house_type, energy_price] = total_payments
-
-    return df
 
 
 def print_sanity_check(result_df, delta_df, house_size_m2, person: Person):
@@ -128,7 +27,7 @@ def print_sanity_check(result_df, delta_df, house_size_m2, person: Person):
     print("\nSanity check:")
     print("======================")
     print(f"Year of birth      : {person.yob}")
-    print(f"Year of retirement : {person.yob + config.get('basic').get('pension_age')}")
+    print(f"Year of retirement : {person.yob + CONFIG.get('basic').get('pension_age')}")
     print(f"Year of death      : {person.yod}")
     print(f"House size         : {house_size_m2}m2\n")
 
@@ -147,39 +46,6 @@ def print_sanity_check(result_df, delta_df, house_size_m2, person: Person):
         )
 
     return
-
-
-def plot_single(delta_df: pd.DataFrame, person: Person):
-    fig, ax = plt.subplots()
-    ax.yaxis.set_major_formatter(currency)
-    width_inches = 10
-    height_inches = width_inches * 9 / 16
-    fig.set_size_inches(width_inches, height_inches)
-    fig.suptitle(
-        f"Additional heating energy cost of an 'average' house relative to Passive House ({current_year}-{person.yod})"
-    )
-    delta_df.plot(ax=ax)
-    plt.legend(
-        title="Energy variable unit cost (p/kWh)",
-        labels=[round(col, 2) * 100 for col in delta_df.columns],
-    )
-    ax.set_xlabel("Energy price Compound Annual Growth Rate")
-    text = f"Year of birth: {person.yod}\nHouse size: {house_size_m2}m2"
-    at = AnchoredText(text, prop=dict(size=15), frameon=True, loc="upper center")
-    at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
-    ax.add_artist(at)
-    plt.grid(
-        visible=True,
-        which="major",
-        axis="y",
-        color="grey",
-        linestyle="-",
-        linewidth=0.5,
-    )
-    outfile = PLOT_DIR / f"heating_cost_comparison_{person.yob}_{house_size_m2}.png"
-    plt.savefig(outfile)
-    plt.show()
-    print(f"\nSaved file to {outfile}")
 
 
 def plot_4_panel(result_df, house_size_m2, person):
@@ -271,10 +137,11 @@ if __name__ == "__main__":
 
     house_size_m2 = 100
 
-    result_df = compute_relative_energy_cost(person.years_until_death(), house_size_m2)
+    result_df = compute_heating_cost_sensitivities(
+        person.years_until_death(), house_size_m2
+    )
     delta_df = result_df["average"] - result_df["passive"]
 
     print_sanity_check(result_df, delta_df, house_size_m2, person)
 
-    plot_single(delta_df, person)
     plot_4_panel(result_df, house_size_m2, person)
