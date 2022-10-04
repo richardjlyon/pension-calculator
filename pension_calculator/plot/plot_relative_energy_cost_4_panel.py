@@ -112,8 +112,9 @@ def plot_4_panel(df: pd.DataFrame, person: Person, house_area_m2: float):
         PLOT_DIR / f"relative_energy_cost_4_panel_{person.yob}_{house_area_m2}.png"
     )
     plt.savefig(outfile)
-    plt.show()
     print(f"\nSaved file to {outfile}")
+
+    plt.show()
 
 
 if __name__ == "__main__":

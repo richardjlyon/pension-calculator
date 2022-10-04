@@ -8,7 +8,7 @@ and passive houses.
 import matplotlib.pyplot as plt
 from pension_calculator.plot.utils import waterfall_chart
 
-from pension_calculator import CONFIG
+from pension_calculator import CONFIG, PLOT_DIR
 from pension_calculator.compute.compute_payment_schedule import (
     ScenarioParams,
     compute_payment_schedule,
@@ -17,6 +17,7 @@ from pension_calculator.plot.utils import currency
 
 YOB = 1997
 YOD = YOB + CONFIG.get("basic").get("life_expectancy")
+YOR = YOB + CONFIG.get("basic").get("pension_age") - 1
 HOUSE_PURCHASE_YEAR = 2022
 HOUSE_PURCHASE_COST = 160000
 HOUSE_AREA_M2 = 100
@@ -25,7 +26,7 @@ MORTGAGE_INTEREST_RATE = 0.0425
 MORTGAGE_LENGTH_YEARS = 40
 PENSION_GROWTH_RATE = 0.01
 ENERGY_TARIFF = 0.05
-ENERGY_CAGR = 0.07
+ENERGY_CAGR = 0.05
 
 average_params = ScenarioParams(
     person_year_of_birth=YOB,
@@ -95,6 +96,16 @@ if __name__ == "__main__":
         textcoords="offset pixels",
     )
     average_df.plot(ax=ax1, legend=None)
+    ax1.fill_between(
+        average_df.index, average_df["heating"], color="tab:blue", alpha=0.25
+    )
+    ax1.fill_between(
+        average_df.index, average_df["mortgage"], color="tab:orange", alpha=0.25
+    )
+    ax1.fill_between(
+        average_df.index, average_df["pension"], color="tab:green", alpha=0.25
+    )
+    ax1.axvline(x=YOR, ymin=0, ymax=max_cost, color="tab:red", alpha=0.25)
 
     # top right: plot 'passive' house
     ax2.yaxis.set_major_formatter(currency)
@@ -106,18 +117,34 @@ if __name__ == "__main__":
         xycoords="axes points",
         textcoords="offset pixels",
     )
-    passive_df.plot(ax=ax2)
+    passive_df.plot(ax=ax2).legend(loc="upper right")
+    ax2.fill_between(
+        passive_df.index, passive_df["heating"], color="tab:blue", alpha=0.25
+    )
+    ax2.fill_between(
+        passive_df.index, passive_df["mortgage"], color="tab:orange", alpha=0.25
+    )
+    ax2.fill_between(
+        passive_df.index, passive_df["pension"], color="tab:green", alpha=0.25
+    )
+    ax2.axvline(x=YOR, ymin=0, ymax=max_cost, color="tab:red", alpha=0.25)
 
     # bottom left: plot difference
     ax3.yaxis.set_major_formatter(currency)
     ax3.annotate(
         f"Difference",
         (0, 0),
-        (20, 20),
+        (20, 10),
         xycoords="axes points",
         textcoords="offset pixels",
     )
     delta_df.plot(ax=ax3, legend=None)
+    ax3.fill_between(delta_df.index, delta_df["heating"], color="tab:blue", alpha=0.25)
+    ax3.fill_between(
+        delta_df.index, delta_df["mortgage"], color="tab:orange", alpha=0.25
+    )
+    ax3.fill_between(delta_df.index, delta_df["pension"], color="tab:green", alpha=0.25)
+    ax3.axvline(x=YOR, ymin=0, ymax=max_cost, color="tab:red", alpha=0.25)
 
     # bottom right: "waterfall"
     labels = ["mortgage", "heating", "pension"]
@@ -143,18 +170,21 @@ if __name__ == "__main__":
 
     # parameters
     ax1.annotate(
-        f"Year of Birth: {passive_params.person_year_of_birth}, "
+        f"Born: {passive_params.person_year_of_birth}, "
+        f"Retired: {YOR}, "
         f"House cost: £{passive_params.house_purchase_cost/1000:1.0f}K, "
         f"{passive_params.mortgage_interest_rate*100}%/{passive_params.mortgage_length_years}y Mortgage, "
         f"Area: {passive_params.house_area_m2}m2, "
         f"Energy Tariff: {passive_params.energy_tariff*100}p/kWh, "
-        f"Energy CAGR: {passive_params.energy_cagr*100:1.0f}%, ",
+        f"Energy CAGR: {passive_params.energy_cagr*100:1.0f}%, "
+        f"Pension CAGR: {passive_params.pension_growth_rate*100:1.0f}%",
         (0, 0),
         (33, 525),
         xycoords="figure points",
         textcoords="offset pixels",
         va="top",
         color="grey",
+        fontsize="small",
     )
 
     # footer
@@ -167,5 +197,12 @@ if __name__ == "__main__":
         va="top",
         color="grey",
     )
+
+    outfile = (
+        PLOT_DIR
+        / f"payment_shedule_{YOB}_tarrif_{passive_params.energy_tariff}_cagr_{passive_params.energy_cagr}.png"
+    )
+    plt.savefig(outfile)
+    print(f"\nSaved file to {outfile}")
 
     plt.show()
