@@ -171,7 +171,7 @@ if __name__ == "__main__":
     # parameters
     ax1.annotate(
         f"Born: {passive_params.person_year_of_birth}, "
-        f"Retired: {YOR}, "
+        f"Retire: {YOR}, "
         f"House cost: £{passive_params.house_purchase_cost/1000:1.0f}K, "
         f"{passive_params.mortgage_interest_rate*100}%/{passive_params.mortgage_length_years}y Mortgage, "
         f"Area: {passive_params.house_area_m2}m2, "
