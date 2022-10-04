@@ -12,7 +12,7 @@ from pension_calculator.plot.utils import currency
 
 def plot_single(df: pd.DataFrame, person: Person, house_area_m2: float):
     """
-    Plot a single graph illustrating the additional heating energy cost of an 'average' house relative to a passive
+    Plot a single figure illustrating the additional heating energy cost of an 'average' house relative to a passive
     house for a range of energy tariff and compound annual growth rates.
 
     Parameters
@@ -52,7 +52,7 @@ def plot_single(df: pd.DataFrame, person: Person, house_area_m2: float):
         linestyle="-",
         linewidth=0.5,
     )
-    outfile = PLOT_DIR / f"heating_cost_comparison_{person.yob}_{house_area_m2}.png"
+    outfile = PLOT_DIR / f"relative_energy_cost_single_{person.yob}_{house_area_m2}.png"
     plt.savefig(outfile)
     plt.show()
     print(f"\nSaved file to {outfile}")

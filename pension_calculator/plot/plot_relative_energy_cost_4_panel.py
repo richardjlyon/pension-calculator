@@ -5,50 +5,35 @@ Generate a graph of the cost of an "average" house relative to a passive house a
 energy price and compound annual growth rate/.
 """
 
-import datetime
-
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
-import toml
+import pandas as pd
 
-from pension_calculator import PLOT_DIR, CONFIG
+from pension_calculator import CURRENT_YEAR, PLOT_DIR
 from pension_calculator.compute.compute_heating_cost_sensitivities import (
     compute_heating_cost_sensitivities,
 )
+from pension_calculator.compute.utils import print_sanity_check
 from pension_calculator.models.person import Person
 from pension_calculator.plot.utils import currency
 
 
-current_year = datetime.date.today().year
+def plot_4_panel(df: pd.DataFrame, person: Person, house_area_m2: float):
+    """
+    Plot a four panel figure illustrating the additional heating energy cost of an 'average' house relative to a passive
+    house for a range of energy tariff and compound annual growth rates.
 
+    Parameters
+    ----------
+    df A dataframe of data to plot
+    person A person (to supply the year of death)
+    house_area_m2 The area of the house (m2)
 
-def print_sanity_check(result_df, delta_df, house_size_m2, person: Person):
+    Returns
+    -------
+    None
 
-    print("\nSanity check:")
-    print("======================")
-    print(f"Year of birth      : {person.yob}")
-    print(f"Year of retirement : {person.yob + CONFIG.get('basic').get('pension_age')}")
-    print(f"Year of death      : {person.yod}")
-    print(f"House size         : {house_size_m2}m2\n")
-
-    samples = [
-        {"CAGR": 0.05, "price": 0.05},
-        {"CAGR": 0.10, "price": 0.05},
-        {"CAGR": 0.05, "price": 0.20},
-        {"CAGR": 0.10, "price": 0.20},
-    ]
-
-    for sample in samples:
-        cagr = sample["CAGR"]
-        price = sample["price"]
-        print(
-            f"price: {price:.2f} |  CAGR: {cagr:.2f} | average: {round(result_df['average', price][cagr]):>7} | passive: {round(result_df['passive', price][cagr]):>7} | difference: {round(delta_df[price][cagr]):>7}"
-        )
-
-    return
-
-
-def plot_4_panel(result_df, house_size_m2, person):
+    """
 
     max_cost = result_df["average"].max(axis=1).max()
 
@@ -58,7 +43,7 @@ def plot_4_panel(result_df, house_size_m2, person):
     fig.set_size_inches(width_inches, height_inches)
     fig.patch.set_facecolor("white")
     fig.suptitle(
-        f"Additional heating energy cost of an 'average' house relative to Passive House ({current_year}-{person.yod})",
+        f"Additional heating energy cost of an 'average' house relative to Passive House ({CURRENT_YEAR}-{person.yod})",
         fontsize=12,
     )
 
@@ -98,7 +83,7 @@ def plot_4_panel(result_df, house_size_m2, person):
     ax1.legend(loc="upper right")
 
     ax1.annotate(
-        f"Floor area: {house_size_m2} m2",
+        f"Floor area: {house_area_m2} m2",
         (0, 0),
         (20, 180),
         xycoords="axes points",
@@ -124,7 +109,7 @@ def plot_4_panel(result_df, house_size_m2, person):
     )
 
     outfile = (
-        PLOT_DIR / f"heating_cost_comparison_4_panel_{person.yob}_{house_size_m2}.png"
+        PLOT_DIR / f"relative_energy_cost_4_panel_{person.yob}_{house_area_m2}.png"
     )
     plt.savefig(outfile)
     plt.show()
@@ -134,14 +119,12 @@ def plot_4_panel(result_df, house_size_m2, person):
 if __name__ == "__main__":
 
     person = Person(1997)
-
-    house_size_m2 = 100
+    house_area_m2 = 100
 
     result_df = compute_heating_cost_sensitivities(
-        person.years_until_death(), house_size_m2
+        person=person, house_area_m2=house_area_m2
     )
     delta_df = result_df["average"] - result_df["passive"]
+    plot_4_panel(df=result_df, house_area_m2=house_area_m2, person=person)
 
-    print_sanity_check(result_df, delta_df, house_size_m2, person)
-
-    plot_4_panel(result_df, house_size_m2, person)
+    print_sanity_check(result_df, delta_df, house_area_m2, person)
