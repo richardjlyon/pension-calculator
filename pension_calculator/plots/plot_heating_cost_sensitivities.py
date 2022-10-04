@@ -90,7 +90,7 @@ def compute_relative_energy_cost(
     Parameters
     ----------
     year_of_birth The year of birth to compute year of death from (default set from config file)
-    house_size_m2 The size of the house in square metres (default set from config file)
+    house_area_m2 The size of the house in square metres (default set from config file)
 
     Returns
     -------
@@ -112,7 +112,9 @@ def compute_relative_energy_cost(
 
                 energy = Energy(tariff=energy_price, cagr=growth_rate)
                 annual_payments = energy.annual_payments(
-                    years=years_until_death, kwh_m2=kwh_m2, house_size_m2=house_size_m2
+                    years=years_until_death,
+                    house_kwh_m2a=kwh_m2,
+                    house_area_m2=house_size_m2,
                 )
                 total_payments.append(annual_payments.sum())
 

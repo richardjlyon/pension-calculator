@@ -1,11 +1,9 @@
-import datetime
-
 from pension_calculator.models.house import House
 
 
 def test_init():
     house = House(
-        purchase_date=datetime.datetime.now(),
+        purchase_year=2022,
         purchase_cost=10000,
         passive_house_premium=0.1,
         area_m2=100,

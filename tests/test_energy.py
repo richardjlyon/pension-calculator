@@ -2,12 +2,12 @@ from pytest import approx
 
 
 def test_annual_energy_cost(energy):
-    assert energy.annual_energy_cost(kwh_m2=100, house_size_m2=100) == 500
+    assert energy.annual_energy_cost(kwh_m2=100, house_area_m2=100) == 500
 
 
 def test_annual_payments(energy):
     annual_payments = energy.annual_payments(
-        kwh_m2=100, house_size_m2=100, starting_year=2022, year_of_death=2052
+        house_kwh_m2a=100, house_area_m2=100, starting_year=2022, year_of_death=2052
     )
     expected_total = 35380  # see Numbers document
 
@@ -39,8 +39,8 @@ def test_retirement_cost(energy):
 # )
 # def test_compute_relative_energy_cost(cagr, price, average, passive, difference):
 #     life_expectancy = 21
-#     house_size_m2 = 100
-#     result_df = compute_relative_energy_cost(life_expectancy, house_size_m2)
+#     house_area_m2 = 100
+#     result_df = compute_relative_energy_cost(life_expectancy, house_area_m2)
 #     delta_df = result_df["average"] - result_df["passive"]
 #
 #     assert round(result_df["average", price][cagr]) == average

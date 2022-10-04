@@ -15,6 +15,7 @@ from math import isclose
 class Mortgage:
     """Represents a mortgage."""
 
+    purchase_year: int
     purchase_price: float
     deposit: float
     interest_rate: float
@@ -59,5 +60,5 @@ class Mortgage:
                 "interest": interest_payment,
                 "total": principal_payment + interest_payment,
             },
-            index=np.arange(self.length_years),
+            index=range(self.purchase_year, self.purchase_year + self.length_years),
         )

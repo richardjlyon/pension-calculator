@@ -6,8 +6,7 @@ Richard Lyon
 """
 
 import datetime
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 import toml
 
@@ -23,13 +22,14 @@ class Person:
     """Represents a person who owns a house and a pension."""
 
     yob: int
-    yor: int = field(init=False)
-    yod: int = field(init=False)
 
-    def __post_init__(self):
+    @property
+    def yor(self):
+        return self.yob + pension_age
 
-        self.yor = self.yob + pension_age
-        self.yod = self.yob + life_expectancy
+    @property
+    def yod(self):
+        return self.yob + life_expectancy
 
     def years_until_death(self) -> int:
         """

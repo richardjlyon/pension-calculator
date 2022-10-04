@@ -12,7 +12,7 @@ from dataclasses import dataclass
 class House:
     """Represents a house with a mortgage and energy bills."""
 
-    purchase_date: datetime.datetime
+    purchase_year: int
     purchase_cost: float
     passive_house_premium: float
     area_m2: float
