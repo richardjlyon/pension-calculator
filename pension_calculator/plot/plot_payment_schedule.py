@@ -6,13 +6,17 @@ and passive houses.
 """
 
 import matplotlib.pyplot as plt
+from pension_calculator.plot.utils import waterfall_chart
 
+from pension_calculator import CONFIG
 from pension_calculator.compute.compute_payment_schedule import (
     ScenarioParams,
     compute_payment_schedule,
 )
+from pension_calculator.plot.utils import currency
 
 YOB = 1997
+YOD = YOB + CONFIG.get("basic").get("life_expectancy")
 HOUSE_PURCHASE_YEAR = 2022
 HOUSE_PURCHASE_COST = 160000
 HOUSE_AREA_M2 = 100
@@ -21,7 +25,7 @@ MORTGAGE_INTEREST_RATE = 0.0425
 MORTGAGE_LENGTH_YEARS = 40
 PENSION_GROWTH_RATE = 0.01
 ENERGY_TARIFF = 0.05
-ENERGY_CAGR = 0.05
+ENERGY_CAGR = 0.04
 
 average_params = ScenarioParams(
     person_year_of_birth=YOB,
@@ -59,8 +63,80 @@ if __name__ == "__main__":
     passive_df = compute_payment_schedule(passive_params, do_summary=True)
     delta_df = passive_df - average_df
 
-    average_df.plot()
-    passive_df.plot()
-    delta_df.plot()
+    # initialise figure
+    fig = plt.figure()
+    width_inches = 10
+    height_inches = width_inches * 9 / 16
+    fig.set_size_inches(width_inches, height_inches)
+    fig.patch.set_facecolor("white")
+    fig.suptitle(
+        f"Pension, mortgage, and heating cost of a Passive house relative to average ({HOUSE_PURCHASE_YEAR}-{YOD})",
+        fontsize=12,
+    )
+
+    # make four subplots and get axes
+
+    max_cost = average_df.max(axis=1).max() * 1.2
+
+    gs = fig.add_gridspec(2, 2, hspace=0.2, wspace=0.2)
+    (ax1, ax2), (ax3, ax4) = gs.subplots()
+    axes = [ax1, ax2, ax3, ax4]
+
+    # top left: plot 'average' house
+    ax1.yaxis.set_major_formatter(currency)
+    ax1.set_ylim([0, max_cost])
+    ax1.annotate(
+        f"Average - {average_params.house_annual_heating_kwh_m2a} kWh/m2(a)",
+        (0, 0),
+        (20, 180),
+        xycoords="axes points",
+        textcoords="offset pixels",
+    )
+    average_df.plot(ax=ax1, legend=None)
+
+    # top right: plot 'passive' house
+    ax2.yaxis.set_major_formatter(currency)
+    ax2.set_ylim([0, max_cost])
+    ax2.annotate(
+        f"Passive - {passive_params.house_annual_heating_kwh_m2a} kWh/m2(a)",
+        (0, 0),
+        (20, 180),
+        xycoords="axes points",
+        textcoords="offset pixels",
+    )
+    passive_df.plot(ax=ax2)
+
+    # bottom left: plot difference
+    ax3.yaxis.set_major_formatter(currency)
+    ax3.annotate(
+        f"Difference",
+        (0, 0),
+        (20, 20),
+        xycoords="axes points",
+        textcoords="offset pixels",
+    )
+    delta_df.plot(ax=ax3, legend=None)
+
+    # bottom right: "waterfall"
+    labels = ["mortgage", "heating", "pension"]
+    data = [
+        -delta_df["mortgage"].sum(),
+        -delta_df["heating"].sum(),
+        -delta_df["pension"].sum(),
+    ]
+
+    waterfall_chart(
+        labels,
+        data,
+        ax=ax4,
+        sorted_value=True,
+        green_color="tab:green",
+        red_color="tab:red",
+        blue_color="tab:blue",
+        Title="Savings",
+        rotation_value=0,
+        formatting="£ {:,.0f}",
+        net_label="saving",
+    )
 
     plt.show()
