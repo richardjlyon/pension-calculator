@@ -25,7 +25,7 @@ MORTGAGE_INTEREST_RATE = 0.0425
 MORTGAGE_LENGTH_YEARS = 40
 PENSION_GROWTH_RATE = 0.01
 ENERGY_TARIFF = 0.05
-ENERGY_CAGR = 0.04
+ENERGY_CAGR = 0.07
 
 average_params = ScenarioParams(
     person_year_of_birth=YOB,
@@ -71,7 +71,9 @@ if __name__ == "__main__":
     fig.patch.set_facecolor("white")
     fig.suptitle(
         f"Pension, mortgage, and heating cost of a Passive house relative to average ({HOUSE_PURCHASE_YEAR}-{YOD})",
+        x=0.45,
         fontsize=12,
+        fontweight="bold",
     )
 
     # make four subplots and get axes
@@ -137,6 +139,33 @@ if __name__ == "__main__":
         rotation_value=0,
         formatting="£ {:,.0f}",
         net_label="saving",
+    )
+
+    # parameters
+    ax1.annotate(
+        f"Year of Birth: {passive_params.person_year_of_birth}, "
+        f"House cost: £{passive_params.house_purchase_cost/1000:1.0f}K, "
+        f"{passive_params.mortgage_interest_rate*100}%/{passive_params.mortgage_length_years}y Mortgage, "
+        f"Area: {passive_params.house_area_m2}m2, "
+        f"Energy Tariff: {passive_params.energy_tariff*100}p/kWh, "
+        f"Energy CAGR: {passive_params.energy_cagr*100:1.0f}%, ",
+        (0, 0),
+        (33, 525),
+        xycoords="figure points",
+        textcoords="offset pixels",
+        va="top",
+        color="grey",
+    )
+
+    # footer
+    ax3.annotate(
+        "Lyon Energy Futures Ltd.",
+        (0, 0),
+        (30, 25),
+        xycoords="figure points",
+        textcoords="offset pixels",
+        va="top",
+        color="grey",
     )
 
     plt.show()

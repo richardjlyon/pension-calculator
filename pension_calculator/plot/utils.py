@@ -45,7 +45,6 @@ def waterfall_chart(
     index = np.array(index)
     data = np.array(data)
 
-    # wip
     # sorted by absolute value
     if sorted_value:
         abs_data = abs(data)
@@ -67,7 +66,6 @@ def waterfall_chart(
 
     changes = {"amount": data}
 
-    # fig, ax = plt.subplots(figsize=figsize)
     ax.yaxis.set_major_formatter(currency)
 
     # Store data and create a blank series to use for the waterfall
