@@ -19,7 +19,13 @@ class Pension:
     saving_length_years: int
 
     def annual_payments(self) -> pd.Series:
-        """Compute the annual payment required to achieve the target given a growth rate and saving period."""
+        """
+        Compute the annual payments required to achieve the target given a growth rate and saving period.
+
+        Returns
+        -------
+        A series of payments with year as the index.
+        """
 
         amount = (
             self.target

@@ -51,9 +51,9 @@ def compute_data(p: ScenarioParams):
     energy = Energy(tariff=p.energy_tariff, cagr=p.energy_cagr)
 
     retirement_energy_cost = energy.retirement_cost(
-        kwh_m2=p.house_annual_heating_kwh_m2a,
-        house_size_m2=p.house_area_m2,
-        starting_year=p.house_purchase_year,
+        house_kwh_m2a=p.house_annual_heating_kwh_m2a,
+        house_area_m2=p.house_area_m2,
+        first_year=p.house_purchase_year,
         year_of_retirement=person.yor,
         year_of_death=person.yod,
     )
@@ -70,8 +70,8 @@ def compute_data(p: ScenarioParams):
     annual_energy_payments = energy.annual_payments(
         house_kwh_m2a=p.house_annual_heating_kwh_m2a,
         house_area_m2=p.house_area_m2,
-        starting_year=p.house_purchase_year,
-        year_of_death=person.yod,
+        first_year=p.house_purchase_year,
+        last_year=person.yod,
     )
     annual_mortgage_payments = mortgage.annual_payments()["total"]
     annual_pension_payments = pension.annual_payments()

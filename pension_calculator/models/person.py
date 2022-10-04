@@ -25,10 +25,12 @@ class Person:
 
     @property
     def yor(self):
+        """Year of retirement."""
         return self.yob + pension_age
 
     @property
     def yod(self):
+        """Year of death."""
         return self.yob + life_expectancy
 
     def years_until_death(self) -> int:
