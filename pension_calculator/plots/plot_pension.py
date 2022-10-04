@@ -4,28 +4,22 @@ plot_pension.py
 A script to generate plots that illustrate the difference in mortgage, energy, and pension payments between ordinary
 and passive houses. 
 """
-import datetime
 from dataclasses import dataclass
 
+import matplotlib.pyplot as plt
 import pandas as pd
 
-import matplotlib.pyplot as plt
-
-from pension_calculator.models.energy import Energy
-from pension_calculator.models.house import House
-from pension_calculator.models.mortgage import Mortgage
-from pension_calculator.models.pension import Pension
-from pension_calculator.models.person import Person
+from pension_calculator.models import Energy, House, Mortgage, Pension, Person
 
 
 @dataclass
 class ScenarioParams:
-    house_annual_heating_kwh_m2a: float
-    house_area_m2: float
-    house_purchase_cost: int
-    house_purchase_year: int
-    house_passive_house_premium: float
     person_year_of_birth: int
+    house_purchase_year: int
+    house_purchase_cost: int
+    house_passive_house_premium: float
+    house_area_m2: float
+    house_annual_heating_kwh_m2a: float
     mortgage_deposit: int
     mortgage_interest_rate: float
     mortgage_length_years: int
@@ -82,24 +76,28 @@ def compute_data(p: ScenarioParams):
     annual_mortgage_payments = mortgage.annual_payments()["total"]
     annual_pension_payments = pension.annual_payments()
 
-    return pd.DataFrame(
+    df = pd.DataFrame(
         data={
-            "energy_payments": annual_energy_payments,
-            "mortgage_payments": annual_mortgage_payments,
-            "pension_payments": annual_pension_payments,
+            "energy": annual_energy_payments,
+            "mortgage": annual_mortgage_payments,
+            "pension": annual_pension_payments,
         },
         index=range(p.house_purchase_year, person.yod),
     )
 
+    df = df.fillna(0).astype({"energy": "int", "mortgage": "int", "pension": "int"})
+
+    return df
+
 
 if __name__ == "__main__":
     params = ScenarioParams(
-        house_annual_heating_kwh_m2a=100,
-        house_area_m2=100,
-        house_purchase_cost=100000,
-        house_purchase_year=2022,
-        house_passive_house_premium=0.1,
         person_year_of_birth=1965,
+        house_purchase_year=2022,
+        house_purchase_cost=100000,
+        house_passive_house_premium=0.1,
+        house_area_m2=100,
+        house_annual_heating_kwh_m2a=100,
         mortgage_deposit=0,
         mortgage_interest_rate=0.06,
         mortgage_length_years=20,

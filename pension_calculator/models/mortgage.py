@@ -24,7 +24,7 @@ class Mortgage:
     def monthly_payment(self) -> float:
         """Compute the monthly payment."""
         loan_amount = self.purchase_price * (1 - self.deposit)
-        return npf.pmt(
+        return -npf.pmt(
             rate=self.interest_rate / 12, nper=self.length_years * 12, pv=loan_amount
         )
 
@@ -33,7 +33,7 @@ class Mortgage:
         loan_amount = self.purchase_price * (1 - self.deposit)
         periods = np.arange(self.length_years * 12 + 1)
 
-        principal_payment = npf.ppmt(
+        principal_payment = -npf.ppmt(
             rate=self.interest_rate / 12,
             per=periods,
             nper=self.length_years * 12,
@@ -42,7 +42,7 @@ class Mortgage:
             1:
         ]  # don't understand why we need [1:], but element [0], and sum() is wrong
 
-        interest_payment = npf.ipmt(
+        interest_payment = -npf.ipmt(
             rate=self.interest_rate / 12,
             per=periods,
             nper=self.length_years * 12,
@@ -52,9 +52,9 @@ class Mortgage:
         # downsample from monthly to annual and sense check
         interest_payment = interest_payment.reshape(-1, 12).sum(axis=1)
         principal_payment = principal_payment.reshape(-1, 12).sum(axis=1)
-        assert isclose(principal_payment.sum(), -loan_amount, rel_tol=0.01)
+        assert isclose(principal_payment.sum(), loan_amount, rel_tol=0.01)
 
-        return pd.DataFrame(
+        df = pd.DataFrame(
             data={
                 "principal": principal_payment,
                 "interest": interest_payment,
@@ -62,3 +62,5 @@ class Mortgage:
             },
             index=range(self.purchase_year, self.purchase_year + self.length_years),
         )
+
+        return df
