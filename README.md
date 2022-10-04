@@ -2,4 +2,4 @@
 
 A python script to estimate the effective pension annuity of different house thermal efficiency.
 
-![](./pension_calculator/plots/figures/heating_cost_comparison_4_panel_1997_100.png)
+![](pension_calculator/plot/figures/heating_cost_comparison_4_panel_1997_100.png)
