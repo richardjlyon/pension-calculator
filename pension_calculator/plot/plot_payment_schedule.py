@@ -17,10 +17,10 @@ if __name__ == "__main__":
         person_year_of_birth=1997,
         house_purchase_year=2022,
         house_purchase_cost=100000,
-        house_passive_house_premium=0.0,
+        house_passive_house_premium=0.1,
         house_area_m2=100,
         house_annual_heating_kwh_m2a=100,
-        mortgage_deposit_percent=0,
+        mortgage_deposit_percent=0.1,
         mortgage_interest_rate=0.0425,
         mortgage_length_years=40,
         pension_growth_rate=0.01,
@@ -28,8 +28,6 @@ if __name__ == "__main__":
         energy_cagr=0.04,
     )
     data_df = compute_payment_schedule(params)
-
-    print(data_df)
 
     data_df.plot()
     plt.show()
