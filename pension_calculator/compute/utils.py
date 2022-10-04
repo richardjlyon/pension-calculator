@@ -1,10 +1,8 @@
 import numpy as np
 import pandas as pd
 
-from pension_calculator import ROOT, CONFIG
+from pension_calculator import CONFIG
 from pension_calculator.models import Person
-
-PLOT_DIR = ROOT / "plot" / "figures"
 
 
 def compute_energy_prices():

@@ -30,7 +30,20 @@ class ScenarioParams:
     energy_cagr: float
 
 
-def compute_data(p: ScenarioParams):
+def compute_data(p: ScenarioParams) -> pd.DataFrame:
+    """
+    Compute the energy, mortgage, and pension costs associated with a scenario described by the supplied scenario
+    description.
+
+    Parameters
+    ----------
+    p The scenario parameters
+
+    Returns
+    -------
+    A dataframe containing the energy, mortgage, and pension costs with an index of years.
+
+    """
 
     person = Person(yob=p.person_year_of_birth)
 

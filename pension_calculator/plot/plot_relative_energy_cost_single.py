@@ -1,3 +1,4 @@
+import matplotlib.ticker as mtick
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.offsetbox import AnchoredText
@@ -27,23 +28,25 @@ def plot_single(df: pd.DataFrame, person: Person, house_area_m2: float):
 
     """
     fig, ax = plt.subplots()
-    ax.yaxis.set_major_formatter(currency)
     width_inches = 10
     height_inches = width_inches * 9 / 16
     fig.set_size_inches(width_inches, height_inches)
     fig.suptitle(
         f"Additional heating energy cost of an 'average' house relative to Passive House ({CURRENT_YEAR}-{person.yod})"
     )
-    df.plot(ax=ax)
-    plt.legend(
-        title="Energy variable unit cost (p/kWh)",
-        labels=[round(col, 2) * 100 for col in df.columns],
-    )
+    ax.yaxis.set_major_formatter(currency)
+    ax.xaxis.set_major_formatter(mtick.PercentFormatter(1.0, 0))
     ax.set_xlabel("Energy price Compound Annual Growth Rate")
     text = f"Year of birth: {person.yob}\nHouse size: {house_area_m2}m2"
     at = AnchoredText(text, prop=dict(size=15), frameon=True, loc="upper center")
     at.patch.set_boxstyle("round,pad=0.,rounding_size=0.2")
     ax.add_artist(at)
+
+    df.plot(ax=ax)
+    plt.legend(
+        title="Energy variable unit cost (p/kWh)",
+        labels=[round(col, 2) * 100 for col in df.columns],
+    )
     plt.grid(
         visible=True,
         which="major",
