@@ -11,13 +11,30 @@ import numpy as np
 from math import isclose
 
 
+def compute_loan_amount(purchase_price: float, deposit_percent: float) -> float:
+    """
+    Compute the loan amount, given a purchase price and deposit.
+
+    Parameters
+    ----------
+    purchase_price Purchase price
+    deposit_percent Deposit (%)
+
+    Returns
+    -------
+    Loan amount.
+
+    """
+    return purchase_price * (1 - deposit_percent)
+
+
 @dataclass
 class Mortgage:
     """Represents a mortgage."""
 
     purchase_year: int
     purchase_price: float
-    deposit: float
+    deposit_percent: float
     interest_rate: float
     length_years: int
 
@@ -29,7 +46,7 @@ class Mortgage:
         -------
         The monthly payment in pounds.
         """
-        loan_amount = self.purchase_price * (1 - self.deposit)
+        loan_amount = compute_loan_amount(self.purchase_price, self.deposit_percent)
         return -npf.pmt(
             rate=self.interest_rate / 12, nper=self.length_years * 12, pv=loan_amount
         )
@@ -42,7 +59,7 @@ class Mortgage:
         -------
         A dataframe of principal, interest, and total payments with year as the index.
         """
-        loan_amount = self.purchase_price * (1 - self.deposit)
+        loan_amount = compute_loan_amount(self.purchase_price, self.deposit_percent)
         periods = np.arange(self.length_years * 12 + 1)
 
         principal_payment = -npf.ppmt(

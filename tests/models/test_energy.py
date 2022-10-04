@@ -2,14 +2,14 @@ from pytest import approx
 
 
 def test_annual_energy_cost(energy):
-    assert energy.annual_energy_cost(house_kwh_m2a=100, house_area_m2=100) == 500
+    assert energy.annual_energy_cost(house_kwh_m2a=100, house_area_m2=100) == 1000
 
 
 def test_annual_payments(energy):
     annual_payments = energy.annual_payments(
         house_kwh_m2a=100, house_area_m2=100, first_year=2022, last_year=2052
     )
-    expected_total = 35380  # see Numbers document
+    expected_total = 70761  # see Numbers document
 
     assert annual_payments.sum() == approx(expected_total, abs=1)
 
@@ -23,7 +23,7 @@ def test_retirement_cost(energy):
         year_of_death=2052,
     )
 
-    expected_total = 29091  # see Numbers document
+    expected_total = 58183  # see Numbers document
 
     assert retirement_cost == approx(expected_total, abs=1)
 

@@ -2,25 +2,14 @@ from pension_calculator.models.mortgage import Mortgage
 from pytest import approx
 
 
-def test_monthly_payment():
-    mortgage = Mortgage(
-        purchase_year=2022,
-        purchase_price=350000,
-        deposit=0.1,
-        interest_rate=0.0425,
-        length_years=20,
-    )
+def test_monthly_payment(mortgage):
+    # given a mortgage
+    # when I check the computed monthly payment
+    # it corresponds to the number calculated in quality-control/mortgage.numbers
     assert mortgage.monthly_payment() == approx(1950.59, abs=0.01)
 
 
-def test_annual_payments():
-    mortgage = Mortgage(
-        purchase_year=2022,
-        purchase_price=350000,
-        deposit=0.1,
-        interest_rate=0.0425,
-        length_years=20,
-    )
+def test_annual_payments(mortgage):
     annual_payments = mortgage.annual_payments()
     expected_annual_payment = 12 * mortgage.monthly_payment()
 

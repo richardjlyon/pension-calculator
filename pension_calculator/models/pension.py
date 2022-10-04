@@ -16,7 +16,7 @@ class Pension:
     target: float
     growth_rate: float
     start_year: int
-    saving_length_years: int
+    end_year: int
 
     def annual_payments(self) -> pd.Series:
         """
@@ -27,13 +27,22 @@ class Pension:
         A series of payments with year as the index.
         """
 
-        amount = (
-            self.target
-            * self.growth_rate
-            / (pow(1 + self.growth_rate, self.saving_length_years) - 1)
-        )
+        years = self.end_year - self.start_year
+
+        amount = self.target * self.growth_rate / (pow(1 + self.growth_rate, years) - 1)
 
         return pd.Series(
-            data=np.full(self.saving_length_years, amount),
-            index=range(self.start_year, self.start_year + self.saving_length_years),
+            data=np.full(years, amount), index=range(self.start_year, self.end_year),
         )
+
+    @property
+    def annual_payment(self) -> float:
+        """
+        Compute the annual payment amount
+
+        Returns
+        -------
+        The annual payment in pounds.
+
+        """
+        return self.annual_payments().iloc[0]

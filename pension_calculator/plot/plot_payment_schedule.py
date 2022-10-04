@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from pension_calculator.compute.compute_payment_schedule import (
     ScenarioParams,
-    compute_data,
+    compute_payment_schedule,
 )
 
 if __name__ == "__main__":
@@ -27,7 +27,7 @@ if __name__ == "__main__":
         energy_tariff=0.1,
         energy_cagr=0.05,
     )
-    data_df = compute_data(params)
+    data_df = compute_payment_schedule(params)
 
     print(data_df)
 
