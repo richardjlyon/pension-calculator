@@ -12,4 +12,6 @@ def test_annual_payment(pension):
 
 
 def test_annual_payments(pension):
-    assert len(pension.annual_payments()) == 10
+    payments = pension.annual_payments()
+    assert len(payments) == 10
+    assert payments["value"].iloc[-1] == approx(10000)

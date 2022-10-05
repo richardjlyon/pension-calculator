@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 
 import numpy as np
+import numpy_financial as npf
 import pandas as pd
 
 
@@ -22,20 +23,27 @@ class Pension:
     start_year: int
     end_year: int
 
-    def annual_payments(self) -> pd.Series:
+    def annual_payments(self) -> pd.DataFrame:
         """Compute the annual payments required to achieve the target, given a growth rate and saving period.
 
         Returns:
-            A Series of payments. Each row is the total payment for that year. The returned series is inclusive of the
-            first year and exclusive of the last i.e. 2010-2020 produces [2010, 2011, .... , 2019]
+            A dataframe of annual payments and value. Each row is the total payment and current value for that year.
+            The returned dataframe is inclusive of the first year and exclusive of the last i.e. 2010-2020 produces
+            [2010, 2011, .... , 2019].
         """
 
-        # TODO: Convert to DataFrame and return compounded annual value.
+        duration_years = self.end_year - self.start_year
+        amount = (
+            self.target
+            * self.growth_rate
+            / (pow(1 + self.growth_rate, duration_years) - 1)
+        )
 
-        years = self.end_year - self.start_year
-        amount = self.target * self.growth_rate / (pow(1 + self.growth_rate, years) - 1)
-        return pd.Series(
-            data=np.full(years, amount), index=range(self.start_year, self.end_year),
+        value = npf.fv(self.growth_rate, range(duration_years), 0, -amount).cumsum()
+
+        return pd.DataFrame(
+            data={"payment": np.full(duration_years, amount), "value": value},
+            index=range(self.start_year, self.end_year),
         )
 
     @property

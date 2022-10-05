@@ -84,7 +84,7 @@ def compute_payment_schedule(
         last_year=person.yod,
     )
     annual_mortgage_payments = mortgage.annual_payments()["total"]
-    annual_pension_payments = pension.annual_payments()
+    annual_pension_payments = pension.annual_payments()["payment"]
 
     # print()
     # print(annual_mortgage_payments)
