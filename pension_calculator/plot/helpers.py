@@ -1,12 +1,12 @@
-from matplotlib.ticker import FuncFormatter
+"""Helpers for plotting charts."""
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.lines as lines
 
 
 def currency(x, pos):
-    """Format y axis currency label as £xxK"""
+    """Format y axis currency label as £xxK."""
     if x >= 1e6:
         return "£{:1.1f}M".format(x * 1e-6)
     else:

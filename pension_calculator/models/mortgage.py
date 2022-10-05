@@ -1,36 +1,31 @@
-"""
-mortgage.py
+"""Class and functions for handling mortgages.
 
-29 September 2022
+Classes:
+    Mortgage: A mortgage
+
+Functions:
+    compute_loan_amount: Compute the loan amount, given a purchase price and deposit.
 """
+
 from dataclasses import dataclass
-
-import pandas as pd
-import numpy_financial as npf
-import numpy as np
 from math import isclose
 
-
-def compute_loan_amount(purchase_price: float, deposit_percent: float) -> float:
-    """
-    Compute the loan amount, given a purchase price and deposit.
-
-    Parameters
-    ----------
-    purchase_price Purchase price
-    deposit_percent Deposit (%)
-
-    Returns
-    -------
-    Loan amount.
-
-    """
-    return purchase_price * (1 - deposit_percent)
+import numpy as np
+import numpy_financial as npf
+import pandas as pd
 
 
 @dataclass
 class Mortgage:
-    """Represents a mortgage."""
+    """A mortgage.
+
+    Attributes:
+        purchase_year: The year of purchase
+        purchase_price: The purchase price
+        deposit_percent: The deposit, expressed as a percentage of purchase price e.g. '0.1'
+        interest_rate: The interest rate, expressed as a percentage e.g. '0.05'
+        length_years: The length of the mortgage, in years.
+    """
 
     purchase_year: int
     purchase_price: float
@@ -39,12 +34,10 @@ class Mortgage:
     length_years: int
 
     def monthly_payment(self) -> float:
-        """
-        Compute the monthly payment.
+        """Compute the monthly payment.
 
-        Returns
-        -------
-        The monthly payment in pounds.
+        Returns:
+            The monthly payment in pounds.
         """
         loan_amount = compute_loan_amount(self.purchase_price, self.deposit_percent)
         return -npf.pmt(
@@ -52,12 +45,13 @@ class Mortgage:
         )
 
     def annual_payments(self) -> pd.DataFrame:
-        """
-        Compute a time series of annual mortgage payments.
+        """Compute a time series of annual mortgage payments.
 
-        Returns
-        -------
-        A dataframe of principal, interest, and total payments with year as the index.
+        Payments are compounded monthly and then resampled to compute the annual payment.
+
+        Returns:
+            A dataframe of principal, interest, and total payments.
+            Each row represents the total payment for a year.
         """
         loan_amount = compute_loan_amount(self.purchase_price, self.deposit_percent)
         periods = np.arange(self.length_years * 12 + 1)
@@ -69,7 +63,7 @@ class Mortgage:
             pv=loan_amount,
         )[
             1:
-        ]  # don't understand why we need [1:], but element [0], and therefore sum(), is wrong
+        ]  # FIXME: I don't understand why we need [1:], but element [0], and therefore sum(), is wrong.
 
         interest_payment = -npf.ipmt(
             rate=self.interest_rate / 12,
@@ -78,9 +72,10 @@ class Mortgage:
             pv=loan_amount,
         )[
             1:
-        ]  # don't understand why we need [1:], but element [0], and therefore sum(), is wrong
+        ]  # FIXME: I don't understand why we need [1:], but element [0], and therefore sum(), is wrong.
 
-        # down sample from monthly to annual and sense check
+        # Down sample from monthly to annual and sense check.
+
         interest_payment = interest_payment.reshape(-1, 12).sum(axis=1)
         principal_payment = principal_payment.reshape(-1, 12).sum(axis=1)
         assert isclose(principal_payment.sum(), loan_amount, rel_tol=0.01)
@@ -100,3 +95,17 @@ class Mortgage:
     def final_year(self) -> int:
         """Return the final payment year."""
         return self.purchase_year + self.length_years - 1
+
+
+def compute_loan_amount(purchase_price: float, deposit_percent: float) -> float:
+    """Compute the loan amount, given a purchase price and deposit.
+
+    Args:
+        purchase_price: Purchase price, in pounds.
+        deposit_percent: Deposit (%) e.g. '0.01'
+
+    Returns:
+        The loan amount.
+    """
+
+    return purchase_price * (1 - deposit_percent)

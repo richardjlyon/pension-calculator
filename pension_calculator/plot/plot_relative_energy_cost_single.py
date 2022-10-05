@@ -1,3 +1,5 @@
+"""Generate a graph of heating cost as a function of tariff and tariff growth rate."""
+
 import matplotlib.ticker as mtick
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -8,25 +10,25 @@ from pension_calculator.compute.compute_heating_cost_sensitivities import (
     compute_heating_cost_sensitivities,
 )
 from pension_calculator.models import Person
-from pension_calculator.plot.utils import currency
+from pension_calculator.plot.helpers import currency
 
 
 def plot_single(df: pd.DataFrame, person: Person, house_area_m2: float):
+    """Plot a single figure of lifetime heating energy cost.
+
+    This is a single graph illustrating the additional lifetime heating energy cost of an "average" house relative to
+    a passive house.
+
+    The data to plot is provided as a dataframe. The columns are selected energy tariffs. The rows are selected
+    tariff growth rates. Each value is the difference in lifetime heating energy cost between house types for that
+    tariff and growth rate.
+
+    Parameters:
+        df: A dataframe of data to plot
+        person: A person (to supply the year of death)
+        house_area_m2: The area of the house (m2)
     """
-    Plot a single figure illustrating the additional heating energy cost of an 'average' house relative to a passive
-    house for a range of energy tariff and compound annual growth rates.
 
-    Parameters
-    ----------
-    df A dataframe of data to plot
-    person A person (to supply the year of death)
-    house_area_m2 The area of the house (m2)
-
-    Returns
-    -------
-    None
-
-    """
     fig, ax = plt.subplots()
     width_inches = 10
     height_inches = width_inches * 9 / 16
@@ -70,4 +72,5 @@ if __name__ == "__main__":
         person=person, house_area_m2=house_area_m2
     )
     delta_df = result_df["average"] - result_df["passive"]
+
     plot_single(df=delta_df, person=person, house_area_m2=house_area_m2)

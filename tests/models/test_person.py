@@ -13,4 +13,3 @@ def test_init():
     p = Person(yob=yob)
     assert p.yor == yob + PENSION_AGE
     assert p.yod == yob + LIFE_EXPECTANCY
-    assert p.years_until_death() == 31

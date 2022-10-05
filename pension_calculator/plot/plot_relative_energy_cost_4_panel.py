@@ -1,8 +1,4 @@
-"""
-graphy.py
-
-Generate a graph of the cost of an "average" house relative to a passive house as a function of
-energy price and compound annual growth rate/.
+"""Generate a graph of the heating cost over time of an "average" house relative to a passive house.
 """
 
 import matplotlib.pyplot as plt
@@ -15,24 +11,25 @@ from pension_calculator.compute.compute_heating_cost_sensitivities import (
 )
 from pension_calculator.compute.utils import print_sanity_check
 from pension_calculator.models.person import Person
-from pension_calculator.plot.utils import currency
+from pension_calculator.plot.helpers import currency
 
 
 def plot_4_panel(df: pd.DataFrame, person: Person, house_area_m2: float):
-    """
-    Plot a four panel figure illustrating the additional heating energy cost of an 'average' house relative to a passive
-    house for a range of energy tariff and compound annual growth rates.
+    """Plot a 4 panel figure.
 
-    Parameters
-    ----------
-    df A dataframe of data to plot
-    person A person (to supply the year of death)
-    house_area_m2 The area of the house (m2)
+    This is a four panel figure with a different average energy tariff in each panel. The graph displays the total cost
+    from the current year until the person's year of death as a function of average tariff compound average growth
+    rate.
 
-    Returns
-    -------
-    None
+    Data is prepared by the imported `compute_heating_cost_sensitivities` function which returns a dataframe. The
+    columns are a multiindex of house type (average, passive) and selected energy tariffs. The rows are selected
+    tariff growth rates. Each value is the lifetime heating energy cost for that house type, tariff, and
+    growth rate.
 
+    Parameters:
+        df: A dataframe of data to plot.
+        person: A person (to supply the year of death).
+        house_area_m2: The area of the house (m2).
     """
 
     max_cost = result_df["average"].max(axis=1).max()

@@ -12,22 +12,7 @@ from dataclasses import dataclass
 import pandas as pd
 
 from pension_calculator.models import Energy, House, Mortgage, Pension, Person
-
-
-@dataclass
-class ScenarioParams:
-    person_year_of_birth: int
-    house_purchase_year: int
-    house_purchase_cost: int
-    house_passive_house_premium: float
-    house_area_m2: float
-    house_annual_heating_kwh_m2a: float
-    mortgage_deposit_percent: float
-    mortgage_interest_rate: float
-    mortgage_length_years: int
-    pension_growth_rate: float
-    energy_tariff: float
-    energy_cagr: float
+from pension_calculator.plot.scenario import ScenarioParams
 
 
 def compute_payment_schedule(
