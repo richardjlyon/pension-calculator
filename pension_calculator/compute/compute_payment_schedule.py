@@ -11,7 +11,7 @@ Richard Lyon
 import pandas as pd
 
 from pension_calculator.models import Energy, House, Mortgage, Pension, Person
-from pension_calculator.plot.scenario import ScenarioParams
+from pension_calculator.plot.scenario import ScenarioParams, passive
 
 
 def compute_payment_schedule(
@@ -31,58 +31,35 @@ def compute_payment_schedule(
 
     """
 
-    house = House(
-        purchase_year=p.house_purchase_year,
-        purchase_cost=p.house_purchase_cost,
-        passive_house_premium=p.house_passive_house_premium,
-        area_m2=p.house_area_m2,
-        annual_heating_kwh_m2a=p.house_annual_heating_kwh_m2a,
-    )
-
-    mortgage = Mortgage(
-        purchase_year=p.house_purchase_year,
-        purchase_price=house.total_cost(),
-        deposit_percent=p.mortgage_deposit_percent,
-        interest_rate=p.mortgage_interest_rate,
-        length_years=p.mortgage_length_years,
-    )
-
-    if mortgage.final_year >= p.person.yod:
+    if p.mortgage.final_year >= p.person.yod:
         raise AttributeError(
-            f"Person dies before mortgage paid ({p.person.yod} vs. {mortgage.final_year})"
+            f"Person dies before mortgage paid ({p.person.yod} vs. {p.mortgage.final_year})"
         )
 
-    if mortgage.final_year >= p.person.yor:
+    if p.mortgage.final_year >= p.person.yor:
         raise AttributeError(
-            f"Person retires before mortgage paid ({p.person.yor} vs. {mortgage.final_year})"
+            f"Person retires before mortgage paid ({p.person.yor} vs. {p.mortgage.final_year})"
         )
 
-    energy = Energy(tariff=p.energy_tariff, cagr=p.energy_cagr)
-
-    retirement_heating_cost = energy.retirement_cost(
-        house_kwh_m2a=p.house_annual_heating_kwh_m2a,
-        house_area_m2=p.house_area_m2,
-        first_year=p.house_purchase_year,
+    retirement_heating_cost = p.energy.retirement_cost(
+        house_kwh_m2a=p.house.annual_heating_kwh_m2a,
+        house_area_m2=p.house.area_m2,
+        first_year=p.house.purchase_year,
         year_of_retirement=p.person.yor,
         year_of_death=p.person.yod,
     )
 
-    pension = Pension(
-        target=retirement_heating_cost,
-        growth_rate=p.pension_growth_rate,
-        start_year=p.house_purchase_year,
-        end_year=p.person.yor,
-    )
+    p.pension.target = retirement_heating_cost
 
-    annual_heating_payments = energy.annual_payments(
-        house_kwh_m2a=p.house_annual_heating_kwh_m2a,
-        house_area_m2=p.house_area_m2,
-        first_year=p.house_purchase_year,
+    annual_heating_payments = p.energy.annual_payments(
+        house_kwh_m2a=p.house.annual_heating_kwh_m2a,
+        house_area_m2=p.house.area_m2,
+        first_year=p.house.purchase_year,
         last_year=p.person.yod,
     )
-    annual_mortgage_payments = mortgage.annual_payments()["total"]
-    annual_pension_payments = pension.annual_payments()["payment"]
-    annual_pension_value = pension.annual_payments()["value"]
+    annual_mortgage_payments = p.mortgage.annual_payments()["total"]
+    annual_pension_payments = p.pension.annual_payments()["payment"]
+    annual_pension_value = p.pension.annual_payments()["value"]
 
     # print()
     # print(annual_mortgage_payments)
@@ -94,15 +71,15 @@ def compute_payment_schedule(
             "pension": annual_pension_payments,
             "pension_value": annual_pension_value,
         },
-        index=range(p.house_purchase_year, p.person.yod + 1),
+        index=range(p.house.purchase_year, p.person.yod + 1),
     )
     if do_summary:
         events = {
             "YOB": p.person.yob,
             "Retire": p.person.yor,
             "Die": p.person.yod,
-            "Purchase": house.purchase_year,
-            "Mortgage paid": mortgage.final_year,
+            "Purchase": p.house.purchase_year,
+            "Mortgage paid": p.mortgage.final_year,
         }
         events = sorted(events.items(), key=lambda x: x[1])
 
@@ -110,7 +87,7 @@ def compute_payment_schedule(
         print("Summary\n============================================")
         for event in events:
             print(f"{event[0]}: {event[1]}")
-        print(f"Total house purchase cost: £{house.total_cost():.0f}")
+        print(f"Total house purchase cost: £{p.house.total_cost():.0f}")
         print(f"Retirement heating cost:   £{retirement_heating_cost:.0f}")
         print(
             f"Monthly heating payment:   £{annual_heating_payments.iloc[0]/12:.0f} -> £{annual_heating_payments.iloc[-1]/12:.0f}"
@@ -125,18 +102,5 @@ def compute_payment_schedule(
 
 
 if __name__ == "__main__":
-    params = ScenarioParams(
-        person=Person(1997),
-        house_purchase_year=2022,
-        house_purchase_cost=100000,
-        house_passive_house_premium=0.1,
-        house_area_m2=100,
-        house_annual_heating_kwh_m2a=100,
-        mortgage_deposit_percent=0.1,
-        mortgage_interest_rate=0.0425,
-        mortgage_length_years=40,
-        pension_growth_rate=0.01,
-        energy_tariff=0.05,
-        energy_cagr=0.04,
-    )
-    data_df = compute_payment_schedule(params, do_summary=True)
+
+    data_df = compute_payment_schedule(passive, do_summary=True)

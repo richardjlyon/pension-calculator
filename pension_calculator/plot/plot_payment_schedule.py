@@ -19,16 +19,15 @@ from pension_calculator.plot.helpers import (
     waterfall_chart,
 )
 from pension_calculator.plot.scenario import (
-    HOUSE_PURCHASE_YEAR,
-    average_params,
-    passive_params,
+    average,
+    passive,
 )
 
 
 def plot():
 
-    average_df = compute_payment_schedule(average_params)
-    passive_df = compute_payment_schedule(passive_params)
+    average_df = compute_payment_schedule(average)
+    passive_df = compute_payment_schedule(passive)
     delta_df = passive_df - average_df
 
     # Initialise a four panel figure.
@@ -39,7 +38,7 @@ def plot():
     fig.set_size_inches(width_inches, height_inches)
     fig.patch.set_facecolor("white")
     fig.suptitle(
-        f"Pension, mortgage, and heating annual payments for a Passive house relative to average ({HOUSE_PURCHASE_YEAR}-{average_params.person.yod})",
+        f"Pension, mortgage, and heating annual payments for a Passive house relative to average ({average.house.purchase_year}-{average.person.yod})",
         x=0.5,
         fontsize=12,
         fontweight="bold",
@@ -60,13 +59,11 @@ def plot():
 
     # Top left: Average house.
 
-    title = f"Average - {average_params.house_annual_heating_kwh_m2a} kWh/m2(a)"
+    title = f"Average - {average.house.annual_heating_kwh_m2a} kWh/m2(a)"
     annotate_title(ax1, title)
     annotate_title(ax1, "RETIREMENT", x=250, y=10, color="tab:red")
     ax1.add_patch(
-        retirement_rectangle(
-            average_params.person.yor, average_params.person.yod, max_cost
-        )
+        retirement_rectangle(average.person.yor, average.person.yod, max_cost)
     )
     ax1.set_ylim([0, max_cost])
 
@@ -86,12 +83,10 @@ def plot():
 
     # Top right: Passive house.
 
-    title = f"Passive - {passive_params.house_annual_heating_kwh_m2a} kWh/m2(a)"
+    title = f"Passive - {average.house.annual_heating_kwh_m2a} kWh/m2(a)"
     annotate_title(ax2, title)
     ax2.add_patch(
-        retirement_rectangle(
-            average_params.person.yor, average_params.person.yod, max_cost
-        )
+        retirement_rectangle(average.person.yor, average.person.yod, max_cost)
     )
     ax2.set_ylim([0, max_cost])
 
@@ -120,10 +115,7 @@ def plot():
 
     ax3.add_patch(
         retirement_rectangle(
-            average_params.person.yor,
-            average_params.person.yod,
-            min_cost * 1.5,
-            max_cost,
+            average.person.yor, average.person.yod, min_cost * 1.5, max_cost,
         )
     )
 
@@ -165,7 +157,7 @@ def plot():
     annotate_subtitle(ax1)
     annotate_copyright(ax3)
 
-    outfile = make_outfile_name("payment_schedule", average_params.person.yob)
+    outfile = make_outfile_name("payment_schedule", average.person.yob)
     plt.savefig(outfile)
     print(f"\nSaved file to {outfile}")
 

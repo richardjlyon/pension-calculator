@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from pension_calculator import PLOT_DIR
-from pension_calculator.plot.scenario import passive_params
+from pension_calculator.plot.scenario import passive
 
 
 def currency(x, pos):
@@ -203,8 +203,8 @@ def retirement_rectangle(
 
     """
     return matplotlib.patches.Rectangle(
-        (yor, min_cost),
-        yod - yor,
+        (yor - 1, min_cost),
+        yod - yor + 1,
         max_cost,
         linewidth=1,
         edgecolor="r",
@@ -232,14 +232,14 @@ def annotate_title(ax: matplotlib.axis, title: str, x=10, y=180, color="black") 
 
 def annotate_subtitle(ax):
     ax.annotate(
-        f"Born: {passive_params.person.yob}, "
-        f"Retire: {passive_params.person.yor}, "
-        f"House cost: £{passive_params.house_purchase_cost / 1000:1.0f}K, "
-        f"{passive_params.mortgage_interest_rate * 100}%/{passive_params.mortgage_length_years}y Mortgage, "
-        f"Area: {passive_params.house_area_m2}m2, "
-        f"Energy Tariff: {passive_params.energy_tariff * 100}p/kWh, "
-        f"Energy CAGR: {passive_params.energy_cagr * 100:1.0f}%, "
-        f"Pension CAGR: {passive_params.pension_growth_rate * 100:1.0f}%",
+        f"Born: {passive.person.yob}, "
+        f"Retire: {passive.person.yor}, "
+        f"House cost: £{passive.house.purchase_cost / 1000:1.0f}K, "
+        f"{passive.mortgage.interest_rate * 100}%/{passive.mortgage.length_years}y Mortgage, "
+        f"Area: {passive.house.area_m2}m2, "
+        f"Energy Tariff: {passive.energy.tariff * 100}p/kWh, "
+        f"Energy CAGR: {passive.energy.cagr * 100:1.0f}%, "
+        f"Pension CAGR: {passive.pension.growth_rate * 100:1.0f}%",
         (0, 0),
         (20, 525),
         xycoords="figure points",
@@ -265,6 +265,6 @@ def annotate_copyright(ax):
 def make_outfile_name(root: str, yob: int) -> str:
     outfile = (
         PLOT_DIR
-        / f"{root}_{yob}_tarrif_{passive_params.energy_tariff}_cagr_{passive_params.energy_cagr}.png"
+        / f"{root}_{yob}_tariff_{passive.energy.tariff}_cagr_{passive.energy.cagr}.png"
     )
     return outfile

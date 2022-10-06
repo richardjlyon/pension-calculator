@@ -2,8 +2,7 @@
 
 from dataclasses import dataclass
 
-from pension_calculator import CONFIG
-from pension_calculator.models import Person
+from pension_calculator.models import Energy, House, Mortgage, Pension, Person
 
 YOB = 1997
 HOUSE_PURCHASE_YEAR = 2022
@@ -23,59 +22,76 @@ class ScenarioParams:
 
     Attributes:
         person: A person.
-        house_purchase_year: House purchase year.
-        house_purchase_cost: House purchase cost.
-        house_passive_house_premium: Additional cost for meeting PH specification. Expressed as percent e.g. '0.1'.
-        house_area_m2: Area of the house in square meters.
-        house_annual_heating_kwh_m2a: Annual heating energy demand in kilowatt-hours per square meter per year.
-        mortgage_deposit_percent: Mortgage deposit as a percentage of purchase cost e.g. '0.1'.
-        mortgage_interest_rate: Mortgage interest rate as a percent e.g. '0.05'.
-        mortgage_length_years: Mortgage length in years.
-        pension_growth_rate: Pension annual growth rate in percent e.g. '0.05'.
-        energy_tariff: Energy tariff in pounds per killowatt-hours e.g. '0.05'.
-        energy_cagr: Energy compound annual growth rate in percent e.g. '0.05'.
+        house: A house.
+        mortgage: A mortgage.
+        pension: A pension.
+        energy: Energy.
+
     """
 
     person: Person
-    house_purchase_year: int
-    house_purchase_cost: int
-    house_passive_house_premium: float
-    house_area_m2: float
-    house_annual_heating_kwh_m2a: float
-    mortgage_deposit_percent: float
-    mortgage_interest_rate: float
-    mortgage_length_years: int
-    pension_growth_rate: float
-    energy_tariff: float
-    energy_cagr: float
+    house: House
+    mortgage: Mortgage
+    pension: Pension
+    energy: Energy
 
 
-average_params = ScenarioParams(
-    person=Person(YOB),
-    house_purchase_year=HOUSE_PURCHASE_YEAR,
-    house_purchase_cost=HOUSE_PURCHASE_COST,
-    house_passive_house_premium=0.0,
-    house_area_m2=HOUSE_AREA_M2,
-    house_annual_heating_kwh_m2a=100,
-    mortgage_deposit_percent=MORTGAGE_DEPOSIT_PERCENT,
-    mortgage_interest_rate=MORTGAGE_INTEREST_RATE,
-    mortgage_length_years=MORTGAGE_LENGTH_YEARS,
-    pension_growth_rate=PENSION_GROWTH_RATE,
-    energy_tariff=ENERGY_TARIFF,
-    energy_cagr=ENERGY_CAGR,
+person = Person(YOB)
+
+average_house = House(
+    purchase_year=HOUSE_PURCHASE_YEAR,
+    purchase_cost=HOUSE_PURCHASE_COST,
+    passive_house_premium=0.0,
+    area_m2=HOUSE_AREA_M2,
+    annual_heating_kwh_m2a=100,
 )
 
-passive_params = ScenarioParams(
-    person=Person(YOB),
-    house_purchase_year=HOUSE_PURCHASE_YEAR,
-    house_purchase_cost=HOUSE_PURCHASE_COST,
-    house_passive_house_premium=0.15,
-    house_area_m2=HOUSE_AREA_M2,
-    house_annual_heating_kwh_m2a=15,
-    mortgage_deposit_percent=MORTGAGE_DEPOSIT_PERCENT,
-    mortgage_interest_rate=MORTGAGE_INTEREST_RATE,
-    mortgage_length_years=MORTGAGE_LENGTH_YEARS,
-    pension_growth_rate=PENSION_GROWTH_RATE,
-    energy_tariff=ENERGY_TARIFF,
-    energy_cagr=ENERGY_CAGR,
+average_mortgage = Mortgage(
+    purchase_year=HOUSE_PURCHASE_YEAR,
+    purchase_price=average_house.total_cost(),
+    deposit_percent=MORTGAGE_DEPOSIT_PERCENT,
+    interest_rate=MORTGAGE_INTEREST_RATE,
+    length_years=MORTGAGE_LENGTH_YEARS,
+)
+
+passive_house = House(
+    purchase_year=HOUSE_PURCHASE_YEAR,
+    purchase_cost=HOUSE_PURCHASE_COST,
+    passive_house_premium=0.15,
+    area_m2=HOUSE_AREA_M2,
+    annual_heating_kwh_m2a=15,
+)
+
+passive_mortgage = Mortgage(
+    purchase_year=HOUSE_PURCHASE_YEAR,
+    purchase_price=passive_house.total_cost(),
+    deposit_percent=MORTGAGE_DEPOSIT_PERCENT,
+    interest_rate=MORTGAGE_INTEREST_RATE,
+    length_years=MORTGAGE_LENGTH_YEARS,
+)
+
+
+pension = Pension(
+    target=None,
+    growth_rate=PENSION_GROWTH_RATE,
+    start_year=HOUSE_PURCHASE_YEAR,
+    end_year=person.yor,
+)
+
+energy = Energy(tariff=ENERGY_TARIFF, cagr=ENERGY_CAGR)
+
+average = ScenarioParams(
+    person=person,
+    house=average_house,
+    mortgage=average_mortgage,
+    pension=pension,
+    energy=energy,
+)
+
+passive = ScenarioParams(
+    person=person,
+    house=passive_house,
+    mortgage=passive_mortgage,
+    pension=pension,
+    energy=energy,
 )

@@ -1,6 +1,7 @@
 """A class that represents a pension."""
 
 from dataclasses import dataclass
+from typing import Optional
 
 import numpy as np
 import numpy_financial as npf
@@ -18,7 +19,7 @@ class Pension:
         end_year: The year that saving ends (exclusive).
     """
 
-    target: float
+    target: Optional[float]
     growth_rate: float
     start_year: int
     end_year: int

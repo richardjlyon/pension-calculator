@@ -13,40 +13,34 @@ from pension_calculator.plot.helpers import (
     retirement_rectangle,
 )
 from pension_calculator.plot.scenario import (
-    average_params,
-    passive_params,
+    average,
+    passive,
 )
 
 
 def plot():
 
-    average_df = compute_payment_schedule(average_params)
-    passive_df = compute_payment_schedule(passive_params)
+    average_df = compute_payment_schedule(average)
+    passive_df = compute_payment_schedule(passive)
 
     # Compute pension draw down from retirement to death.
 
+    print(average.person.yor)
+
     pension_final_value_average = average_df["pension_value"].loc[
-        average_params.person.yor
+        average.person.yor - 1
     ]
     pension_final_value_passive = passive_df["pension_value"].loc[
-        average_params.person.yor
+        average.person.yor - 1
     ]
 
-    average_df["pension_value"].loc[
-        average_params.person.yor + 1 : average_params.person.yod
-    ] = (
+    average_df["pension_value"].loc[average.person.yor : average.person.yod] = (
         pension_final_value_average
-        - average_df["heating"]
-        .loc[average_params.person.yor + 1 : average_params.person.yod]
-        .cumsum()
+        - average_df["heating"].loc[average.person.yor : average.person.yod].cumsum()
     )
-    passive_df["pension_value"].loc[
-        average_params.person.yor + 1 : average_params.person.yod
-    ] = (
+    passive_df["pension_value"].loc[average.person.yor : average.person.yod] = (
         pension_final_value_passive
-        - passive_df["heating"]
-        .loc[average_params.person.yor + 1 : average_params.person.yod]
-        .cumsum()
+        - passive_df["heating"].loc[average.person.yor : average.person.yod].cumsum()
     )
 
     # Initialise a four panel figure.
@@ -57,7 +51,7 @@ def plot():
     fig.set_size_inches(width_inches, height_inches)
     fig.patch.set_facecolor("white")
     fig.suptitle(
-        f"Pension, mortgage, and heating annual payments for a Passive house relative to average ({average_params.house_purchase_year}-{average_params.person.yod})",
+        f"Pension, mortgage, and heating annual payments for a Passive house relative to average ({average.house.purchase_year}-{average.person.yod})",
         x=0.5,
         fontsize=12,
         fontweight="bold",
@@ -82,9 +76,7 @@ def plot():
     annotate_title(ax1, "Mortgage payments")
     annotate_title(ax1, "RETIREMENT", x=250, y=10, color="tab:red")
     ax1.add_patch(
-        retirement_rectangle(
-            average_params.person.yor, average_params.person.yod, max_cost
-        )
+        retirement_rectangle(average.person.yor, average.person.yod, max_cost)
     )
 
     passive_df["mortgage"].plot(ax=ax1, color="tab:blue", label="passive")
@@ -103,9 +95,7 @@ def plot():
 
     annotate_title(ax2, "Heating cost")
     ax2.add_patch(
-        retirement_rectangle(
-            average_params.person.yor, average_params.person.yod, max_cost
-        )
+        retirement_rectangle(average.person.yor, average.person.yod, max_cost)
     )
 
     passive_df["heating"].plot(ax=ax2, color="tab:orange", label="passive")
@@ -124,9 +114,7 @@ def plot():
 
     annotate_title(ax3, "Heating pension - payments")
     ax3.add_patch(
-        retirement_rectangle(
-            average_params.person.yor, average_params.person.yod, max_cost
-        )
+        retirement_rectangle(average.person.yor, average.person.yod, max_cost)
     )
 
     passive_df["pension"].plot(ax=ax3, color="tab:green", label="passive")
@@ -147,11 +135,9 @@ def plot():
     max_cost = average_df[["heating", "pension_value"]].max(axis=1).max() * 1.2
     ax4.set_ylim([0, max_cost])
     ax4.add_patch(
-        retirement_rectangle(
-            average_params.person.yor, average_params.person.yod, max_cost
-        )
+        retirement_rectangle(average.person.yor, average.person.yod, max_cost)
     )
-
+    person = average.person
     passive_df["pension_value"].plot(ax=ax4, color="tab:green", label="passive")
     average_df["pension_value"].plot(
         ax=ax4, color="tab:green", linestyle="dashed", label="average"
@@ -184,7 +170,7 @@ def plot():
     annotate_subtitle(ax1)
     annotate_copyright(ax3)
 
-    outfile = make_outfile_name("payment_schedule_explainer", average_params.person.yob)
+    outfile = make_outfile_name("payment_schedule_explainer", average.person.yob)
 
     plt.savefig(outfile)
     print(f"\nSaved file to {outfile}")
