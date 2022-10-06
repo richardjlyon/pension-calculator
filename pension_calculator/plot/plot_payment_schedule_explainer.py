@@ -2,7 +2,6 @@
 import matplotlib
 import matplotlib.pyplot as plt
 
-from pension_calculator import PLOT_DIR
 from pension_calculator.compute.compute_payment_schedule import compute_payment_schedule
 from pension_calculator.plot.helpers import (
     annotate_copyright,
@@ -10,11 +9,11 @@ from pension_calculator.plot.helpers import (
     annotate_title,
     compute_lowest_decade,
     currency,
+    make_outfile_name,
     retirement_rectangle,
 )
 from pension_calculator.plot.scenario import (
     HOUSE_PURCHASE_YEAR,
-    YOB,
     YOD,
     YOR,
     average_params,
@@ -158,10 +157,8 @@ def plot():
     annotate_subtitle(ax1)
     annotate_copyright(ax3)
 
-    outfile = (
-        PLOT_DIR
-        / f"payment_shedule_explainer_{YOB}_tarrif_{passive_params.energy_tariff}_cagr_{passive_params.energy_cagr}.png"
-    )
+    outfile = make_outfile_name("payment_schedule_explainer")
+
     plt.savefig(outfile)
     print(f"\nSaved file to {outfile}")
 

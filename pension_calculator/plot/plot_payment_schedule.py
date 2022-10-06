@@ -23,6 +23,7 @@ from pension_calculator.plot.helpers import (
     annotate_title,
     compute_lowest_decade,
     currency,
+    make_outfile_name,
     retirement_rectangle,
     waterfall_chart,
 )
@@ -153,10 +154,7 @@ def plot():
     annotate_subtitle(ax1)
     annotate_copyright(ax3)
 
-    outfile = (
-        PLOT_DIR
-        / f"payment_shedule_{YOB}_tarrif_{passive_params.energy_tariff}_cagr_{passive_params.energy_cagr}.png"
-    )
+    outfile = make_outfile_name("payment_schedule")
     plt.savefig(outfile)
     print(f"\nSaved file to {outfile}")
 

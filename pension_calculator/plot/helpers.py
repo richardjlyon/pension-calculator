@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from pension_calculator.plot.scenario import YOR, passive_params
+from pension_calculator import PLOT_DIR
+from pension_calculator.plot.scenario import YOB, YOR, passive_params
 
 
 def currency(x, pos):
@@ -259,3 +260,11 @@ def annotate_copyright(ax):
         va="top",
         color="grey",
     )
+
+
+def make_outfile_name(root: str) -> str:
+    outfile = (
+        PLOT_DIR
+        / f"{root}_{YOB}_tarrif_{passive_params.energy_tariff}_cagr_{passive_params.energy_cagr}.png"
+    )
+    return outfile
