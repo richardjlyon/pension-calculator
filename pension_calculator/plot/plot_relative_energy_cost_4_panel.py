@@ -3,18 +3,21 @@
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
-import pandas as pd
 
 from pension_calculator import CURRENT_YEAR, PLOT_DIR
 from pension_calculator.compute.compute_heating_cost_sensitivities import (
     compute_heating_cost_sensitivities,
 )
-from pension_calculator.compute.utils import print_sanity_check
 from pension_calculator.models.person import Person
-from pension_calculator.plot.helpers import currency
+from pension_calculator.plot.helpers import (
+    annotate_copyright,
+    annotate_subtitle,
+    annotate_title,
+    currency,
+)
 
 
-def plot_4_panel(df: pd.DataFrame, person: Person, house_area_m2: float):
+def plot():
     """Plot a 4 panel figure.
 
     This is a four panel figure with a different average energy tariff in each panel. The graph displays the total cost
@@ -26,13 +29,16 @@ def plot_4_panel(df: pd.DataFrame, person: Person, house_area_m2: float):
     tariff growth rates. Each value is the lifetime heating energy cost for that house type, tariff, and
     growth rate.
 
-    Parameters:
-        df: A dataframe of data to plot.
-        person: A person (to supply the year of death).
-        house_area_m2: The area of the house (m2).
     """
 
-    max_cost = result_df["average"].max(axis=1).max()
+    person = Person(1997)
+    house_area_m2 = 100
+
+    result_df = compute_heating_cost_sensitivities(
+        person=person, house_area_m2=house_area_m2
+    )
+
+    # Initialise a four panel figure.
 
     fig = plt.figure()
     width_inches = 10
@@ -41,12 +47,16 @@ def plot_4_panel(df: pd.DataFrame, person: Person, house_area_m2: float):
     fig.patch.set_facecolor("white")
     fig.suptitle(
         f"Additional heating energy cost of an 'average' house relative to Passive House ({CURRENT_YEAR}-{person.yod})",
+        x=0.45,
         fontsize=12,
+        fontweight="bold",
     )
 
-    gs = fig.add_gridspec(2, 2, hspace=0, wspace=0)
-    (ax1, ax2), (ax3, ax4) = gs.subplots(sharex="col", sharey="row")
+    gs = fig.add_gridspec(2, 2, hspace=0.05, wspace=0.2)
+    (ax1, ax2), (ax3, ax4) = gs.subplots(sharex="col")
     axes = [ax1, ax2, ax3, ax4]
+
+    max_cost = result_df["average"].max(axis=1).max()
     prices = result_df["average"].columns[::-1]
 
     for ax, price in zip(axes, prices):
@@ -69,41 +79,15 @@ def plot_4_panel(df: pd.DataFrame, person: Person, house_area_m2: float):
             result_df.index, result_df["passive", price], color="tab:green", alpha=0.25
         )
 
-        ax.annotate(
-            f"Energy price: £{price:.2f}/kWh",
-            (0, 0),
-            (20, 200),
-            xycoords="axes points",
-            textcoords="offset pixels",
-        )
+        title = f"Energy price: £{price:.2f}/kWh"
+        annotate_title(ax, title, y=190)
 
     ax1.legend(loc="upper right")
 
-    ax1.annotate(
-        f"Floor area: {house_area_m2} m2",
-        (0, 0),
-        (20, 180),
-        xycoords="axes points",
-        textcoords="offset pixels",
-    )
+    subtitle_text = f"Year Of Birth: {person.yob}, Floor area: {house_area_m2} m2"
+    annotate_subtitle(ax1, subtitle_text)
 
-    ax1.annotate(
-        f"Year Of Birth: {person.yob}",
-        (0, 0),
-        (20, 160),
-        xycoords="axes points",
-        textcoords="offset pixels",
-    )
-
-    ax3.annotate(
-        "Lyon Energy Futures Ltd.",
-        (0, 0),
-        (30, 25),
-        xycoords="figure points",
-        textcoords="offset pixels",
-        va="top",
-        color="grey",
-    )
+    annotate_copyright(ax3)
 
     outfile = (
         PLOT_DIR / f"relative_energy_cost_4_panel_{person.yob}_{house_area_m2}.png"
@@ -115,14 +99,4 @@ def plot_4_panel(df: pd.DataFrame, person: Person, house_area_m2: float):
 
 
 if __name__ == "__main__":
-
-    person = Person(1997)
-    house_area_m2 = 100
-
-    result_df = compute_heating_cost_sensitivities(
-        person=person, house_area_m2=house_area_m2
-    )
-    delta_df = result_df["average"] - result_df["passive"]
-    plot_4_panel(df=result_df, house_area_m2=house_area_m2, person=person)
-
-    print_sanity_check(result_df, delta_df, house_area_m2, person)
+    plot()

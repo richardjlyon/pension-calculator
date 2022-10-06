@@ -230,16 +230,9 @@ def annotate_title(ax: matplotlib.axis, title: str, x=10, y=180, color="black") 
     )
 
 
-def annotate_subtitle(ax):
+def annotate_subtitle(ax, text: str):
     ax.annotate(
-        f"Born: {passive.person.yob}, "
-        f"Retire: {passive.person.yor}, "
-        f"House cost: £{passive.house.purchase_cost / 1000:1.0f}K, "
-        f"{passive.mortgage.interest_rate * 100}%/{passive.mortgage.length_years}y Mortgage, "
-        f"Area: {passive.house.area_m2}m2, "
-        f"Energy Tariff: {passive.energy.tariff * 100}p/kWh, "
-        f"Energy CAGR: {passive.energy.cagr * 100:1.0f}%, "
-        f"Pension CAGR: {passive.pension.growth_rate * 100:1.0f}%",
+        text,
         (0, 0),
         (20, 525),
         xycoords="figure points",
