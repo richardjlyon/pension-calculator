@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from pension_calculator import PLOT_DIR
 from pension_calculator.compute.compute_payment_schedule import compute_payment_schedule
 from pension_calculator.plot.helpers import (
+    annotate_copyright,
+    annotate_subtitle,
     annotate_title,
     compute_lowest_decade,
     currency,
@@ -20,7 +22,7 @@ from pension_calculator.plot.scenario import (
 )
 
 
-def main():
+def plot():
 
     average_df = compute_payment_schedule(average_params)
     passive_df = compute_payment_schedule(passive_params)
@@ -71,15 +73,15 @@ def main():
     annotate_title(ax1, "RETIREMENT", x=250, y=10, color="tab:red")
     ax1.add_patch(retirement_rectangle(YOR, YOD, max_cost))
 
-    passive_df["mortgage"].plot(ax=ax1, color="tab:orange", label="passive")
+    passive_df["mortgage"].plot(ax=ax1, color="tab:blue", label="passive")
     average_df["mortgage"].plot(
-        ax=ax1, color="tab:orange", linestyle="dashed", label="average"
+        ax=ax1, color="tab:blue", linestyle="dashed", label="average"
     )
     ax1.fill_between(
         average_df.index,
         average_df["mortgage"],
         passive_df["mortgage"],
-        color="tab:orange",
+        color="tab:blue",
         alpha=0.25,
     )
 
@@ -88,15 +90,15 @@ def main():
     annotate_title(ax2, "Heating cost")
     ax2.add_patch(retirement_rectangle(YOR, YOD, max_cost))
 
-    passive_df["heating"].plot(ax=ax2, color="tab:blue", label="passive")
+    passive_df["heating"].plot(ax=ax2, color="tab:orange", label="passive")
     average_df["heating"].plot(
-        ax=ax2, color="tab:blue", linestyle="dashed", label="average"
+        ax=ax2, color="tab:orange", linestyle="dashed", label="average"
     )
     ax2.fill_between(
         average_df.index,
         average_df["heating"],
         passive_df["heating"],
-        color="tab:blue",
+        color="tab:orange",
         alpha=0.25,
     )
 
@@ -153,37 +155,8 @@ def main():
     for ax in axes:
         ax.legend(loc="upper right")
 
-    # Display selected parameters as a subtitle.
-
-    ax1.annotate(
-        f"Born: {passive_params.person_year_of_birth}, "
-        f"Retire: {YOR}, "
-        f"House cost: £{passive_params.house_purchase_cost/1000:1.0f}K, "
-        f"{passive_params.mortgage_interest_rate*100}%/{passive_params.mortgage_length_years}y Mortgage, "
-        f"Area: {passive_params.house_area_m2}m2, "
-        f"Energy Tariff: {passive_params.energy_tariff*100}p/kWh, "
-        f"Energy CAGR: {passive_params.energy_cagr*100:1.0f}%, "
-        f"Pension CAGR: {passive_params.pension_growth_rate*100:1.0f}%",
-        (0, 0),
-        (20, 525),
-        xycoords="figure points",
-        textcoords="offset pixels",
-        va="top",
-        color="grey",
-        fontsize="small",
-    )
-
-    # Copyright footer.
-
-    ax3.annotate(
-        "© Lyon Energy Futures Ltd. (2022)",
-        (0, 0),
-        (20, 25),
-        xycoords="figure points",
-        textcoords="offset pixels",
-        va="top",
-        color="grey",
-    )
+    annotate_subtitle(ax1)
+    annotate_copyright(ax3)
 
     outfile = (
         PLOT_DIR
@@ -196,4 +169,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    plot()

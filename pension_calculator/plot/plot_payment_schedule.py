@@ -17,98 +17,113 @@ from pension_calculator.plot.scenario import (
     average_params,
     passive_params,
 )
-from pension_calculator.plot.helpers import currency, waterfall_chart
+from pension_calculator.plot.helpers import (
+    annotate_copyright,
+    annotate_subtitle,
+    annotate_title,
+    compute_lowest_decade,
+    currency,
+    retirement_rectangle,
+    waterfall_chart,
+)
 
-if __name__ == "__main__":
+
+def plot():
 
     average_df = compute_payment_schedule(average_params)
     passive_df = compute_payment_schedule(passive_params)
     delta_df = passive_df - average_df
 
-    # initialise figure
+    # Initialise a four panel figure.
+
     fig = plt.figure()
     width_inches = 10
     height_inches = width_inches * 9 / 16
     fig.set_size_inches(width_inches, height_inches)
     fig.patch.set_facecolor("white")
     fig.suptitle(
-        f"Pension, mortgage, and heating cost of a Passive house relative to average ({HOUSE_PURCHASE_YEAR}-{YOD})",
-        x=0.45,
+        f"Pension, mortgage, and heating annual payments for a Passive house relative to average ({HOUSE_PURCHASE_YEAR}-{YOD})",
+        x=0.5,
         fontsize=12,
         fontweight="bold",
     )
-
-    # make four subplots and get axes
-
-    max_cost = average_df.max(axis=1).max() * 1.2
-
     gs = fig.add_gridspec(2, 2, hspace=0.2, wspace=0.2)
     (ax1, ax2), (ax3, ax4) = gs.subplots()
     axes = [ax1, ax2, ax3, ax4]
 
-    # Top left: plot 'average' house.
+    # Set axis limits.
 
-    ax1.yaxis.set_major_formatter(currency)
+    max_cost = average_df[["mortgage", "heating", "pension"]].max(axis=1).max() * 1.2
+    min_year = compute_lowest_decade(average_df.index.min())
+    max_year = average_df.index.max()
+
+    for ax in [ax1, ax2, ax3]:
+        ax.yaxis.set_major_formatter(currency)
+        ax.set_xlim([min_year, max_year])
+
+    # Top left: Average house.
+
+    title = f"Average - {average_params.house_annual_heating_kwh_m2a} kWh/m2(a)"
+    annotate_title(ax1, title)
+    annotate_title(ax1, "RETIREMENT", x=250, y=10, color="tab:red")
+    ax1.add_patch(retirement_rectangle(YOR, YOD, max_cost))
     ax1.set_ylim([0, max_cost])
-    ax1.annotate(
-        f"Average - {average_params.house_annual_heating_kwh_m2a} kWh/m2(a)",
-        (0, 0),
-        (20, 180),
-        xycoords="axes points",
-        textcoords="offset pixels",
-    )
-    average_df.plot(ax=ax1, legend=None)
+
+    average_df["mortgage"].plot(ax=ax1, legend=None, color="tab:blue")
+    average_df["heating"].plot(ax=ax1, legend=None, color="tab:orange")
+    average_df["pension"].plot(ax=ax1, legend=None, color="tab:green")
+
     ax1.fill_between(
-        average_df.index, average_df["heating"], color="tab:blue", alpha=0.25
+        average_df.index, average_df["heating"], color="tab:orange", alpha=0.25
     )
     ax1.fill_between(
-        average_df.index, average_df["mortgage"], color="tab:orange", alpha=0.25
+        average_df.index, average_df["mortgage"], color="tab:blue", alpha=0.25
     )
     ax1.fill_between(
         average_df.index, average_df["pension"], color="tab:green", alpha=0.25
     )
-    ax1.axvline(x=YOR, ymin=0, ymax=max_cost, color="tab:red", alpha=0.25)
 
-    # Top right: plot 'passive' house.
+    # Top right: Passive house.
 
-    ax2.yaxis.set_major_formatter(currency)
+    title = f"Passive - {passive_params.house_annual_heating_kwh_m2a} kWh/m2(a)"
+    annotate_title(ax2, title)
+    ax2.add_patch(retirement_rectangle(YOR, YOD, max_cost))
     ax2.set_ylim([0, max_cost])
-    ax2.annotate(
-        f"Passive - {passive_params.house_annual_heating_kwh_m2a} kWh/m2(a)",
-        (0, 0),
-        (20, 180),
-        xycoords="axes points",
-        textcoords="offset pixels",
-    )
-    passive_df.plot(ax=ax2).legend(loc="upper right")
+
+    passive_df["mortgage"].plot(ax=ax2, legend="mortgage", color="tab:blue")
+    passive_df["heating"].plot(ax=ax2, legend="heating", color="tab:orange")
+    passive_df["pension"].plot(ax=ax2, legend="pension", color="tab:green")
+
     ax2.fill_between(
-        passive_df.index, passive_df["heating"], color="tab:blue", alpha=0.25
+        passive_df.index, passive_df["heating"], color="tab:orange", alpha=0.25
     )
     ax2.fill_between(
-        passive_df.index, passive_df["mortgage"], color="tab:orange", alpha=0.25
+        passive_df.index, passive_df["mortgage"], color="tab:blue", alpha=0.25
     )
     ax2.fill_between(
         passive_df.index, passive_df["pension"], color="tab:green", alpha=0.25
     )
-    ax2.axvline(x=YOR, ymin=0, ymax=max_cost, color="tab:red", alpha=0.25)
+    ax2.legend(loc="upper right")
 
-    # Bottom left: plot difference.
+    # Bottom left: difference.
 
-    ax3.yaxis.set_major_formatter(currency)
-    ax3.annotate(
-        f"Difference",
-        (0, 0),
-        (20, 10),
-        xycoords="axes points",
-        textcoords="offset pixels",
-    )
-    delta_df.plot(ax=ax3, legend=None)
-    ax3.fill_between(delta_df.index, delta_df["heating"], color="tab:blue", alpha=0.25)
+    annotate_title(ax3, "Difference", y=10)
+
+    min_cost = delta_df[["mortgage", "heating", "pension"]].min(axis=1).min()
+    max_cost = delta_df[["mortgage", "heating", "pension"]].max(axis=1).max() * 1.5
+    ax3.set_ylim([min_cost, max_cost])
+
+    ax3.add_patch(retirement_rectangle(YOR, YOD, min_cost * 1.5, max_cost))
+
+    delta_df["mortgage"].plot(ax=ax3, legend=None, color="tab:blue")
+    delta_df["heating"].plot(ax=ax3, legend=None, color="tab:orange")
+    delta_df["pension"].plot(ax=ax3, legend=None, color="tab:green")
+
     ax3.fill_between(
-        delta_df.index, delta_df["mortgage"], color="tab:orange", alpha=0.25
+        delta_df.index, delta_df["heating"], color="tab:orange", alpha=0.25
     )
+    ax3.fill_between(delta_df.index, delta_df["mortgage"], color="tab:blue", alpha=0.25)
     ax3.fill_between(delta_df.index, delta_df["pension"], color="tab:green", alpha=0.25)
-    ax3.axvline(x=YOR, ymin=0, ymax=max_cost, color="tab:red", alpha=0.25)
 
     # Bottom right: "waterfall" showing cumulative differences.
 
@@ -135,35 +150,8 @@ if __name__ == "__main__":
 
     # Display selected parameters as a subtitle.
 
-    ax1.annotate(
-        f"Born: {passive_params.person_year_of_birth}, "
-        f"Retire: {YOR}, "
-        f"House cost: £{passive_params.house_purchase_cost/1000:1.0f}K, "
-        f"{passive_params.mortgage_interest_rate*100}%/{passive_params.mortgage_length_years}y Mortgage, "
-        f"Area: {passive_params.house_area_m2}m2, "
-        f"Energy Tariff: {passive_params.energy_tariff*100}p/kWh, "
-        f"Energy CAGR: {passive_params.energy_cagr*100:1.0f}%, "
-        f"Pension CAGR: {passive_params.pension_growth_rate*100:1.0f}%",
-        (0, 0),
-        (33, 525),
-        xycoords="figure points",
-        textcoords="offset pixels",
-        va="top",
-        color="grey",
-        fontsize="small",
-    )
-
-    # Copyright footer.
-
-    ax3.annotate(
-        "Lyon Energy Futures Ltd.",
-        (0, 0),
-        (30, 25),
-        xycoords="figure points",
-        textcoords="offset pixels",
-        va="top",
-        color="grey",
-    )
+    annotate_subtitle(ax1)
+    annotate_copyright(ax3)
 
     outfile = (
         PLOT_DIR
@@ -173,3 +161,7 @@ if __name__ == "__main__":
     print(f"\nSaved file to {outfile}")
 
     plt.show()
+
+
+if __name__ == "__main__":
+    plot()

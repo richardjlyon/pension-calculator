@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from pension_calculator.plot.scenario import YOR, passive_params
+
 
 def currency(x, pos):
     """Format y axis currency label as £xxK."""
@@ -186,20 +188,21 @@ def waterfall_chart(
 
 
 def retirement_rectangle(
-    yor: int, yod: int, max_cost: float
+    yor: int, yod: int, max_cost: float, min_cost: float = 0
 ) -> matplotlib.patches.Rectangle:
     """Return a rectangle representing the retirement period.
     Args:
         yor: Year of retirement
         yod: Year of death
         max_cost: Maximum cost
+        min_cost: Minimum cost
 
     Returns:
         A Rectangle patch representing the retirement period.
 
     """
     return matplotlib.patches.Rectangle(
-        (yor, 0),
+        (yor, min_cost),
         yod - yor,
         max_cost,
         linewidth=1,
@@ -223,4 +226,36 @@ def annotate_title(ax: matplotlib.axis, title: str, x=10, y=180, color="black") 
         color=color,
         xycoords="axes points",
         textcoords="offset pixels",
+    )
+
+
+def annotate_subtitle(ax):
+    ax.annotate(
+        f"Born: {passive_params.person_year_of_birth}, "
+        f"Retire: {YOR}, "
+        f"House cost: £{passive_params.house_purchase_cost / 1000:1.0f}K, "
+        f"{passive_params.mortgage_interest_rate * 100}%/{passive_params.mortgage_length_years}y Mortgage, "
+        f"Area: {passive_params.house_area_m2}m2, "
+        f"Energy Tariff: {passive_params.energy_tariff * 100}p/kWh, "
+        f"Energy CAGR: {passive_params.energy_cagr * 100:1.0f}%, "
+        f"Pension CAGR: {passive_params.pension_growth_rate * 100:1.0f}%",
+        (0, 0),
+        (20, 525),
+        xycoords="figure points",
+        textcoords="offset pixels",
+        va="top",
+        color="grey",
+        fontsize="small",
+    )
+
+
+def annotate_copyright(ax):
+    ax.annotate(
+        "© Lyon Energy Futures Ltd. (2022)",
+        (0, 0),
+        (20, 25),
+        xycoords="figure points",
+        textcoords="offset pixels",
+        va="top",
+        color="grey",
     )
