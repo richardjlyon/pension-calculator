@@ -22,7 +22,7 @@ from pension_calculator.plot.helpers import currency, waterfall_chart
 if __name__ == "__main__":
 
     average_df = compute_payment_schedule(average_params)
-    passive_df = compute_payment_schedule(passive_params, do_summary=True)
+    passive_df = compute_payment_schedule(passive_params)
     delta_df = passive_df - average_df
 
     # initialise figure

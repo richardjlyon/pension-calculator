@@ -85,6 +85,7 @@ def compute_payment_schedule(
     )
     annual_mortgage_payments = mortgage.annual_payments()["total"]
     annual_pension_payments = pension.annual_payments()["payment"]
+    annual_pension_value = pension.annual_payments()["value"]
 
     # print()
     # print(annual_mortgage_payments)
@@ -94,6 +95,7 @@ def compute_payment_schedule(
             "heating": annual_heating_payments,
             "mortgage": annual_mortgage_payments,
             "pension": annual_pension_payments,
+            "pension_value": annual_pension_value,
         },
         index=range(p.house_purchase_year, person.yod + 1),
     )
