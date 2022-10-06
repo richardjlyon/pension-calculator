@@ -1,4 +1,5 @@
 """Generates a plot that explains how the mortgage, heating and pension costs are built up."""
+import matplotlib
 import matplotlib.pyplot as plt
 
 from pension_calculator import PLOT_DIR
@@ -66,7 +67,7 @@ def main():
 
     # Top left: mortgage.
 
-    annotate_title(ax1, "Mortgage")
+    annotate_title(ax1, "Mortgage payments")
     annotate_title(ax1, "RETIREMENT", x=250, y=10, color="tab:red")
     ax1.add_patch(retirement_rectangle(YOR, YOD, max_cost))
 
@@ -101,7 +102,7 @@ def main():
 
     # Bottom left: pension cost.
 
-    annotate_title(ax3, "Heating pension")
+    annotate_title(ax3, "Heating pension - payments")
     ax3.add_patch(retirement_rectangle(YOR, YOD, max_cost))
 
     passive_df["pension"].plot(ax=ax3, color="tab:green", label="passive")
@@ -134,6 +135,20 @@ def main():
         color="tab:green",
         alpha=0.25,
     )
+
+    # Annotate "house pension"
+
+    rect = matplotlib.patches.Rectangle(
+        (min_year, pension_final_value_passive),
+        max_year - min_year,
+        pension_final_value_average - pension_final_value_passive,
+        linewidth=1,
+        edgecolor="purple",
+        facecolor="tab:purple",
+        alpha=0.1,
+    )
+    ax4.add_patch(rect)
+    annotate_title(ax4, "'House pension'", y=130, color="tab:purple")
 
     for ax in axes:
         ax.legend(loc="upper right")
