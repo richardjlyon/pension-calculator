@@ -7,7 +7,6 @@ Richard Lyon
 3 October 2022
 
 """
-from dataclasses import dataclass
 
 import pandas as pd
 
@@ -32,8 +31,6 @@ def compute_payment_schedule(
 
     """
 
-    person = Person(yob=p.person_year_of_birth)
-
     house = House(
         purchase_year=p.house_purchase_year,
         purchase_cost=p.house_purchase_cost,
@@ -50,14 +47,14 @@ def compute_payment_schedule(
         length_years=p.mortgage_length_years,
     )
 
-    if mortgage.final_year >= person.yod:
+    if mortgage.final_year >= p.person.yod:
         raise AttributeError(
-            f"Person dies before mortgage paid ({person.yod} vs. {mortgage.final_year})"
+            f"Person dies before mortgage paid ({p.person.yod} vs. {mortgage.final_year})"
         )
 
-    if mortgage.final_year >= person.yor:
+    if mortgage.final_year >= p.person.yor:
         raise AttributeError(
-            f"Person retires before mortgage paid ({person.yor} vs. {mortgage.final_year})"
+            f"Person retires before mortgage paid ({p.person.yor} vs. {mortgage.final_year})"
         )
 
     energy = Energy(tariff=p.energy_tariff, cagr=p.energy_cagr)
@@ -66,22 +63,22 @@ def compute_payment_schedule(
         house_kwh_m2a=p.house_annual_heating_kwh_m2a,
         house_area_m2=p.house_area_m2,
         first_year=p.house_purchase_year,
-        year_of_retirement=person.yor,
-        year_of_death=person.yod,
+        year_of_retirement=p.person.yor,
+        year_of_death=p.person.yod,
     )
 
     pension = Pension(
         target=retirement_heating_cost,
         growth_rate=p.pension_growth_rate,
         start_year=p.house_purchase_year,
-        end_year=person.yor,
+        end_year=p.person.yor,
     )
 
     annual_heating_payments = energy.annual_payments(
         house_kwh_m2a=p.house_annual_heating_kwh_m2a,
         house_area_m2=p.house_area_m2,
         first_year=p.house_purchase_year,
-        last_year=person.yod,
+        last_year=p.person.yod,
     )
     annual_mortgage_payments = mortgage.annual_payments()["total"]
     annual_pension_payments = pension.annual_payments()["payment"]
@@ -97,13 +94,13 @@ def compute_payment_schedule(
             "pension": annual_pension_payments,
             "pension_value": annual_pension_value,
         },
-        index=range(p.house_purchase_year, person.yod + 1),
+        index=range(p.house_purchase_year, p.person.yod + 1),
     )
     if do_summary:
         events = {
-            "YOB": person.yob,
-            "Retire": person.yor,
-            "Die": person.yod,
+            "YOB": p.person.yob,
+            "Retire": p.person.yor,
+            "Die": p.person.yod,
             "Purchase": house.purchase_year,
             "Mortgage paid": mortgage.final_year,
         }
@@ -129,7 +126,7 @@ def compute_payment_schedule(
 
 if __name__ == "__main__":
     params = ScenarioParams(
-        person_year_of_birth=1997,
+        person=Person(1997),
         house_purchase_year=2022,
         house_purchase_cost=100000,
         house_passive_house_premium=0.1,

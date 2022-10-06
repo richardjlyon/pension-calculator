@@ -5,6 +5,7 @@ from pension_calculator.compute.compute_payment_schedule import (
     ScenarioParams,
     compute_payment_schedule,
 )
+from pension_calculator.models import Person
 
 
 def test_mortgage_payments(payment_schedule):
@@ -47,7 +48,7 @@ def test_retirement_heating_costs(payment_schedule):
 def test_exception_if_retire_before_mortgage_paid():
     # given a scenario in which the person retires before the mortgage is paid
     params = ScenarioParams(
-        person_year_of_birth=1974,  # retires 2041
+        Person(1974),  # retires 2041
         house_purchase_year=2022,
         house_purchase_cost=350000 / 1.1,
         house_passive_house_premium=0.1,
@@ -69,7 +70,7 @@ def test_exception_if_retire_before_mortgage_paid():
 def test_exception_if_die_before_mortgage_paid():
     # given a scenario in which the person dies before the mortgage is paid
     params = ScenarioParams(
-        person_year_of_birth=1954,  # dies 2041
+        Person(1954),  # dies 2041
         house_purchase_year=2022,
         house_purchase_cost=350000 / 1.1,
         house_passive_house_premium=0.1,

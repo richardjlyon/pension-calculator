@@ -17,6 +17,11 @@ from pension_calculator.compute.compute_payment_schedule import (
     compute_payment_schedule,
 )
 
+from pension_calculator.plot.scenario import (
+    average_params,
+    passive_params,
+)
+
 YOB = 1997
 YOD = YOB + CONFIG.get("basic").get("life_expectancy")
 YOR = YOB + CONFIG.get("basic").get("pension_age") - 1
@@ -34,35 +39,6 @@ ENERGY_CAGR = st.slider(
     "Energy CAGR (%)", value=0.05, min_value=0.0, max_value=1.0, step=0.01
 )
 
-average_params = ScenarioParams(
-    person_year_of_birth=YOB,
-    house_purchase_year=HOUSE_PURCHASE_YEAR,
-    house_purchase_cost=HOUSE_PURCHASE_COST,
-    house_passive_house_premium=0.0,
-    house_area_m2=HOUSE_AREA_M2,
-    house_annual_heating_kwh_m2a=100,
-    mortgage_deposit_percent=MORTGAGE_DEPOSIT_PERCENT,
-    mortgage_interest_rate=MORTGAGE_INTEREST_RATE,
-    mortgage_length_years=MORTGAGE_LENGTH_YEARS,
-    pension_growth_rate=PENSION_GROWTH_RATE,
-    energy_tariff=ENERGY_TARIFF,
-    energy_cagr=ENERGY_CAGR,
-)
-
-passive_params = ScenarioParams(
-    person_year_of_birth=YOB,
-    house_purchase_year=HOUSE_PURCHASE_YEAR,
-    house_purchase_cost=HOUSE_PURCHASE_COST,
-    house_passive_house_premium=0.15,
-    house_area_m2=HOUSE_AREA_M2,
-    house_annual_heating_kwh_m2a=15,
-    mortgage_deposit_percent=MORTGAGE_DEPOSIT_PERCENT,
-    mortgage_interest_rate=MORTGAGE_INTEREST_RATE,
-    mortgage_length_years=MORTGAGE_LENGTH_YEARS,
-    pension_growth_rate=PENSION_GROWTH_RATE,
-    energy_tariff=ENERGY_TARIFF,
-    energy_cagr=ENERGY_CAGR,
-)
 
 average_df = compute_payment_schedule(average_params)
 passive_df = compute_payment_schedule(passive_params)

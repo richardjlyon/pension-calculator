@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from pension_calculator import PLOT_DIR
-from pension_calculator.plot.scenario import YOB, YOR, passive_params
+from pension_calculator.plot.scenario import passive_params
 
 
 def currency(x, pos):
@@ -232,8 +232,8 @@ def annotate_title(ax: matplotlib.axis, title: str, x=10, y=180, color="black") 
 
 def annotate_subtitle(ax):
     ax.annotate(
-        f"Born: {passive_params.person_year_of_birth}, "
-        f"Retire: {YOR}, "
+        f"Born: {passive_params.person.yob}, "
+        f"Retire: {passive_params.person.yor}, "
         f"House cost: £{passive_params.house_purchase_cost / 1000:1.0f}K, "
         f"{passive_params.mortgage_interest_rate * 100}%/{passive_params.mortgage_length_years}y Mortgage, "
         f"Area: {passive_params.house_area_m2}m2, "
@@ -262,9 +262,9 @@ def annotate_copyright(ax):
     )
 
 
-def make_outfile_name(root: str) -> str:
+def make_outfile_name(root: str, yob: int) -> str:
     outfile = (
         PLOT_DIR
-        / f"{root}_{YOB}_tarrif_{passive_params.energy_tariff}_cagr_{passive_params.energy_cagr}.png"
+        / f"{root}_{yob}_tarrif_{passive_params.energy_tariff}_cagr_{passive_params.energy_cagr}.png"
     )
     return outfile

@@ -4,7 +4,7 @@ from pension_calculator.compute.compute_payment_schedule import (
     ScenarioParams,
     compute_payment_schedule,
 )
-from pension_calculator.models import Mortgage, Pension
+from pension_calculator.models import Mortgage, Pension, Person
 from pension_calculator.models.energy import Energy
 
 
@@ -32,7 +32,7 @@ def mortgage():
 @pytest.fixture(scope="module")
 def payment_schedule():
     params = ScenarioParams(
-        person_year_of_birth=1997,
+        Person(1997),
         house_purchase_year=2022,
         house_purchase_cost=350000 / 1.1,
         house_passive_house_premium=0.1,

@@ -3,6 +3,18 @@
 from dataclasses import dataclass
 
 from pension_calculator import CONFIG
+from pension_calculator.models import Person
+
+YOB = 1997
+HOUSE_PURCHASE_YEAR = 2022
+HOUSE_PURCHASE_COST = 160000
+HOUSE_AREA_M2 = 100
+MORTGAGE_DEPOSIT_PERCENT = 0.1
+MORTGAGE_INTEREST_RATE = 0.0425
+MORTGAGE_LENGTH_YEARS = 40
+PENSION_GROWTH_RATE = 0.01
+ENERGY_TARIFF = 0.05
+ENERGY_CAGR = 0.05
 
 
 @dataclass
@@ -10,7 +22,7 @@ class ScenarioParams:
     """Stores parameters for passing to functions.
 
     Attributes:
-        person_year_of_birth: Year of birth.
+        person: A person.
         house_purchase_year: House purchase year.
         house_purchase_cost: House purchase cost.
         house_passive_house_premium: Additional cost for meeting PH specification. Expressed as percent e.g. '0.1'.
@@ -24,7 +36,7 @@ class ScenarioParams:
         energy_cagr: Energy compound annual growth rate in percent e.g. '0.05'.
     """
 
-    person_year_of_birth: int
+    person: Person
     house_purchase_year: int
     house_purchase_cost: int
     house_passive_house_premium: float
@@ -38,21 +50,8 @@ class ScenarioParams:
     energy_cagr: float
 
 
-YOB = 1997
-YOD = YOB + CONFIG.get("basic").get("life_expectancy")
-YOR = YOB + CONFIG.get("basic").get("pension_age") - 1
-HOUSE_PURCHASE_YEAR = 2022
-HOUSE_PURCHASE_COST = 160000
-HOUSE_AREA_M2 = 100
-MORTGAGE_DEPOSIT_PERCENT = 0.1
-MORTGAGE_INTEREST_RATE = 0.0425
-MORTGAGE_LENGTH_YEARS = 40
-PENSION_GROWTH_RATE = 0.01
-ENERGY_TARIFF = 0.05
-ENERGY_CAGR = 0.05
-
 average_params = ScenarioParams(
-    person_year_of_birth=YOB,
+    person=Person(YOB),
     house_purchase_year=HOUSE_PURCHASE_YEAR,
     house_purchase_cost=HOUSE_PURCHASE_COST,
     house_passive_house_premium=0.0,
@@ -67,7 +66,7 @@ average_params = ScenarioParams(
 )
 
 passive_params = ScenarioParams(
-    person_year_of_birth=YOB,
+    person=Person(YOB),
     house_purchase_year=HOUSE_PURCHASE_YEAR,
     house_purchase_cost=HOUSE_PURCHASE_COST,
     house_passive_house_premium=0.15,
