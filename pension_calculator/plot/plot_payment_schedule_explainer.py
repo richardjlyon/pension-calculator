@@ -1,11 +1,14 @@
 """Generates a plot that explains how the mortgage, heating and pension costs are built up."""
 import matplotlib.pyplot as plt
-from matplotlib import patches
-import copy
 
 from pension_calculator import PLOT_DIR
 from pension_calculator.compute.compute_payment_schedule import compute_payment_schedule
-from pension_calculator.plot.helpers import currency
+from pension_calculator.plot.helpers import (
+    annotate_title,
+    compute_lowest_decade,
+    currency,
+    retirement_rectangle,
+)
 from pension_calculator.plot.scenario import (
     HOUSE_PURCHASE_YEAR,
     YOB,
@@ -46,53 +49,27 @@ def main():
         fontsize=12,
         fontweight="bold",
     )
-
-    max_cost = average_df[["mortgage", "heating", "pension"]].max(axis=1).max() * 1.2
-
-    min_year = average_df.index.min()
-    max_year = average_df.index.max()
-
     gs = fig.add_gridspec(2, 2, hspace=0.2, wspace=0.2)
     (ax1, ax2), (ax3, ax4) = gs.subplots()
     axes = [ax1, ax2, ax3, ax4]
 
-    # Create rectangle patches to represent retirement period
-    # We have to copy them because matplotlib won't allow reuse of artists
+    # Set axis limits.
 
-    rect1 = patches.Rectangle(
-        (YOR, 0),
-        YOD - YOR,
-        max_cost,
-        linewidth=1,
-        edgecolor="r",
-        facecolor="r",
-        alpha=0.1,
-    )
-    rect2 = copy.copy(rect1)
-    rect3 = copy.copy(rect2)
-    rect4 = copy.copy(rect3)
+    max_cost = average_df[["mortgage", "heating", "pension"]].max(axis=1).max() * 1.2
+    min_year = compute_lowest_decade(average_df.index.min())
+    max_year = average_df.index.max()
+
+    for ax in axes:
+        ax.yaxis.set_major_formatter(currency)
+        ax.set_ylim([0, max_cost])
+        ax.set_xlim([min_year, max_year])
 
     # Top left: mortgage.
 
-    ax1.yaxis.set_major_formatter(currency)
-    ax1.set_ylim([0, max_cost])
-    ax1.set_xlim([min_year, max_year])
-    ax1.annotate(
-        f"Mortgage",
-        (0, 0),
-        (10, 180),
-        xycoords="axes points",
-        textcoords="offset pixels",
-    )
-    ax1.annotate(
-        f"RETIREMENT",
-        (0, 0),
-        (250, 10),
-        xycoords="axes points",
-        textcoords="offset pixels",
-        color="tab:red",
-    )
-    ax1.add_patch(rect1)
+    annotate_title(ax1, "Mortgage")
+    annotate_title(ax1, "RETIREMENT", x=250, y=10, color="tab:red")
+    ax1.add_patch(retirement_rectangle(YOR, YOD, max_cost))
+
     passive_df["mortgage"].plot(ax=ax1, color="tab:orange", label="passive")
     average_df["mortgage"].plot(
         ax=ax1, color="tab:orange", linestyle="dashed", label="average"
@@ -104,21 +81,12 @@ def main():
         color="tab:orange",
         alpha=0.25,
     )
-    ax1.legend(loc="upper right")
 
     # Top right: heating cost.
 
-    ax2.yaxis.set_major_formatter(currency)
-    ax2.set_ylim([0, max_cost])
-    ax2.set_xlim([min_year, max_year])
-    ax2.annotate(
-        f"Heating cost",
-        (0, 0),
-        (10, 180),
-        xycoords="axes points",
-        textcoords="offset pixels",
-    )
-    ax2.add_patch(rect2)
+    annotate_title(ax2, "Heating cost")
+    ax2.add_patch(retirement_rectangle(YOR, YOD, max_cost))
+
     passive_df["heating"].plot(ax=ax2, color="tab:blue", label="passive")
     average_df["heating"].plot(
         ax=ax2, color="tab:blue", linestyle="dashed", label="average"
@@ -130,21 +98,12 @@ def main():
         color="tab:blue",
         alpha=0.25,
     )
-    ax2.legend(loc="upper right")
 
     # Bottom left: pension cost.
 
-    ax3.yaxis.set_major_formatter(currency)
-    ax3.set_ylim([0, max_cost])
-    ax3.set_xlim([min_year, max_year])
-    ax3.annotate(
-        f"Heating pension",
-        (0, 0),
-        (10, 180),
-        xycoords="axes points",
-        textcoords="offset pixels",
-    )
-    ax3.add_patch(rect3)
+    annotate_title(ax3, "Heating pension")
+    ax3.add_patch(retirement_rectangle(YOR, YOD, max_cost))
+
     passive_df["pension"].plot(ax=ax3, color="tab:green", label="passive")
     average_df["pension"].plot(
         ax=ax3, color="tab:green", linestyle="dashed", label="average"
@@ -156,33 +115,13 @@ def main():
         color="tab:green",
         alpha=0.25,
     )
-    ax3.legend(loc="upper right")
 
     # Bottom right: pension explainer.
 
+    annotate_title(ax4, "Heating pension - value")
     max_cost = average_df[["heating", "pension_value"]].max(axis=1).max() * 1.2
-
-    rect4 = patches.Rectangle(
-        (YOR, 0),
-        YOD - YOR,
-        max_cost,
-        linewidth=1,
-        edgecolor="r",
-        facecolor="r",
-        alpha=0.1,
-    )
-
-    ax4.yaxis.set_major_formatter(currency)
     ax4.set_ylim([0, max_cost])
-    ax4.set_xlim([min_year, max_year])
-    ax4.annotate(
-        f"Heating pension - value",
-        (0, 0),
-        (10, 180),
-        xycoords="axes points",
-        textcoords="offset pixels",
-    )
-    ax4.add_patch(rect4)
+    ax4.add_patch(retirement_rectangle(YOR, YOD, max_cost))
 
     passive_df["pension_value"].plot(ax=ax4, color="tab:green", label="passive")
     average_df["pension_value"].plot(
@@ -196,7 +135,8 @@ def main():
         alpha=0.25,
     )
 
-    ax4.legend(loc="upper right")
+    for ax in axes:
+        ax.legend(loc="upper right")
 
     # Display selected parameters as a subtitle.
 
@@ -221,7 +161,7 @@ def main():
     # Copyright footer.
 
     ax3.annotate(
-        "Lyon Energy Futures Ltd.",
+        "© Lyon Energy Futures Ltd. (2022)",
         (0, 0),
         (20, 25),
         xycoords="figure points",

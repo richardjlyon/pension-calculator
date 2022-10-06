@@ -1,5 +1,7 @@
 """Helpers for plotting charts."""
+import math
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -181,3 +183,44 @@ def waterfall_chart(
     plt.ylim(0, plot_max + round(3.6 * plot_offset, 7))
     # Rotate the labels
     plt.xticks(range(0, len(trans)), trans.index, rotation=rotation_value)
+
+
+def retirement_rectangle(
+    yor: int, yod: int, max_cost: float
+) -> matplotlib.patches.Rectangle:
+    """Return a rectangle representing the retirement period.
+    Args:
+        yor: Year of retirement
+        yod: Year of death
+        max_cost: Maximum cost
+
+    Returns:
+        A Rectangle patch representing the retirement period.
+
+    """
+    return matplotlib.patches.Rectangle(
+        (yor, 0),
+        yod - yor,
+        max_cost,
+        linewidth=1,
+        edgecolor="r",
+        facecolor="r",
+        alpha=0.1,
+    )
+
+
+def compute_lowest_decade(year: int) -> int:
+    """Return the lowest decade of the given year i.e. 2022 -> 2020."""
+    return math.floor(year / 10) * 10
+
+
+def annotate_title(ax: matplotlib.axis, title: str, x=10, y=180, color="black") -> None:
+    """Return a"""
+    ax.annotate(
+        title,
+        (0, 0),
+        (x, y),
+        color=color,
+        xycoords="axes points",
+        textcoords="offset pixels",
+    )
