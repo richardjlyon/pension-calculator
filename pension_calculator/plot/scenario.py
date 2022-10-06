@@ -8,12 +8,12 @@ YOB = 1997
 HOUSE_PURCHASE_YEAR = 2022
 HOUSE_PURCHASE_COST = 160000
 HOUSE_AREA_M2 = 100
-MORTGAGE_DEPOSIT_PERCENT = 0.1
-MORTGAGE_INTEREST_RATE = 0.0425
+MORTGAGE_DEPOSIT_PCNT = 0.1
+MORTGAGE_INTEREST_RATE_PCNT = 0.0425
 MORTGAGE_LENGTH_YEARS = 40
-PENSION_GROWTH_RATE = 0.01
-ENERGY_TARIFF = 0.05
-ENERGY_CAGR = 0.05
+PENSION_GROWTH_RATE_PCNT = 0.01
+ENERGY_TARIFF_PCNT = 0.05
+ENERGY_CAGR_PCNT = 0.05
 
 
 @dataclass
@@ -41,7 +41,7 @@ person = Person(YOB)
 average_house = House(
     purchase_year=HOUSE_PURCHASE_YEAR,
     purchase_cost=HOUSE_PURCHASE_COST,
-    passive_house_premium=0.0,
+    passive_house_premium_pcnt=0.0,
     area_m2=HOUSE_AREA_M2,
     annual_heating_kwh_m2a=100,
 )
@@ -49,15 +49,15 @@ average_house = House(
 average_mortgage = Mortgage(
     purchase_year=HOUSE_PURCHASE_YEAR,
     purchase_price=average_house.total_cost(),
-    deposit_percent=MORTGAGE_DEPOSIT_PERCENT,
-    interest_rate=MORTGAGE_INTEREST_RATE,
+    deposit_pcnt=MORTGAGE_DEPOSIT_PCNT,
+    interest_rate_pcnt=MORTGAGE_INTEREST_RATE_PCNT,
     length_years=MORTGAGE_LENGTH_YEARS,
 )
 
 passive_house = House(
     purchase_year=HOUSE_PURCHASE_YEAR,
     purchase_cost=HOUSE_PURCHASE_COST,
-    passive_house_premium=0.15,
+    passive_house_premium_pcnt=0.15,
     area_m2=HOUSE_AREA_M2,
     annual_heating_kwh_m2a=15,
 )
@@ -65,20 +65,20 @@ passive_house = House(
 passive_mortgage = Mortgage(
     purchase_year=HOUSE_PURCHASE_YEAR,
     purchase_price=passive_house.total_cost(),
-    deposit_percent=MORTGAGE_DEPOSIT_PERCENT,
-    interest_rate=MORTGAGE_INTEREST_RATE,
+    deposit_pcnt=MORTGAGE_DEPOSIT_PCNT,
+    interest_rate_pcnt=MORTGAGE_INTEREST_RATE_PCNT,
     length_years=MORTGAGE_LENGTH_YEARS,
 )
 
 
 pension = Pension(
     target=None,
-    growth_rate=PENSION_GROWTH_RATE,
+    growth_rate_pcnt=PENSION_GROWTH_RATE_PCNT,
     start_year=HOUSE_PURCHASE_YEAR,
     end_year=person.yor,
 )
 
-energy = Energy(tariff=ENERGY_TARIFF, cagr=ENERGY_CAGR)
+energy = Energy(tariff=ENERGY_TARIFF_PCNT, cagr_pcnt=ENERGY_CAGR_PCNT)
 
 average = ScenarioParams(
     person=person,

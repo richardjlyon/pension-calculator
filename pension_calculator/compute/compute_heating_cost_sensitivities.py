@@ -49,7 +49,7 @@ def compute_heating_cost_sensitivities(
             total_payments = []
             for growth_rate in growth_rates:
 
-                energy = Energy(tariff=energy_price, cagr=growth_rate)
+                energy = Energy(tariff=energy_price, cagr_pcnt=growth_rate)
                 annual_payments = energy.annual_payments(
                     house_kwh_m2a=kwh_m2,
                     house_area_m2=house_area_m2,

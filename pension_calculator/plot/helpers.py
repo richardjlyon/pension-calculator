@@ -258,6 +258,6 @@ def annotate_copyright(ax):
 def make_outfile_name(root: str, yob: int) -> str:
     outfile = (
         PLOT_DIR
-        / f"{root}_{yob}_tariff_{passive.energy.tariff}_cagr_{passive.energy.cagr}.png"
+        / f"{root}_{yob}_tariff_{passive.energy.tariff}_cagr_{passive.energy.cagr_pcnt}.png"
     )
     return outfile

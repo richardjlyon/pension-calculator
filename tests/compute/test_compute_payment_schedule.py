@@ -52,19 +52,19 @@ def test_exception_if_retire_before_mortgage_paid():
         House(
             purchase_year=2022,
             purchase_cost=350000 / 1.1,
-            passive_house_premium=0.1,
+            passive_house_premium_pcnt=0.1,
             area_m2=100,
             annual_heating_kwh_m2a=100,
         ),
         Mortgage(
             purchase_year=2022,
             purchase_price=350000,
-            deposit_percent=0.1,
-            interest_rate=0.0425,
+            deposit_pcnt=0.1,
+            interest_rate_pcnt=0.0425,
             length_years=20,
         ),
-        Pension(target=None, growth_rate=0.01, start_year=1997, end_year=2030),
-        Energy(tariff=0.1, cagr=0.05),
+        Pension(target=None, growth_rate_pcnt=0.01, start_year=1997, end_year=2030),
+        Energy(tariff=0.1, cagr_pcnt=0.05),
     )
     # when I compute the payment schedule
     # then an exception is raised
@@ -79,19 +79,19 @@ def test_exception_if_die_before_mortgage_paid():
         House(
             purchase_year=2022,
             purchase_cost=350000 / 1.1,
-            passive_house_premium=0.1,
+            passive_house_premium_pcnt=0.1,
             area_m2=100,
             annual_heating_kwh_m2a=100,
         ),
         Mortgage(
             purchase_year=2022,
             purchase_price=350000,
-            deposit_percent=0.1,
-            interest_rate=0.0425,
+            deposit_pcnt=0.1,
+            interest_rate_pcnt=0.0425,
             length_years=20,
         ),
-        Pension(target=None, growth_rate=0.01, start_year=1997, end_year=2030),
-        Energy(tariff=0.1, cagr=0.05),
+        Pension(target=None, growth_rate_pcnt=0.01, start_year=1997, end_year=2030),
+        Energy(tariff=0.1, cagr_pcnt=0.05),
     )
 
     # when I compute the payment schedule

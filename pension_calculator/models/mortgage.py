@@ -29,8 +29,8 @@ class Mortgage:
 
     purchase_year: int
     purchase_price: float
-    deposit_percent: float
-    interest_rate: float
+    deposit_pcnt: float
+    interest_rate_pcnt: float
     length_years: int
 
     def monthly_payment(self) -> float:
@@ -39,9 +39,11 @@ class Mortgage:
         Returns:
             The monthly payment in pounds.
         """
-        loan_amount = compute_loan_amount(self.purchase_price, self.deposit_percent)
+        loan_amount = compute_loan_amount(self.purchase_price, self.deposit_pcnt)
         return -npf.pmt(
-            rate=self.interest_rate / 12, nper=self.length_years * 12, pv=loan_amount
+            rate=self.interest_rate_pcnt / 12,
+            nper=self.length_years * 12,
+            pv=loan_amount,
         )
 
     def annual_payments(self) -> pd.DataFrame:
@@ -53,11 +55,11 @@ class Mortgage:
             A dataframe of principal, interest, and total payments.
             Each row represents the total payment for a year.
         """
-        loan_amount = compute_loan_amount(self.purchase_price, self.deposit_percent)
+        loan_amount = compute_loan_amount(self.purchase_price, self.deposit_pcnt)
         periods = np.arange(self.length_years * 12 + 1)
 
         principal_payment = -npf.ppmt(
-            rate=self.interest_rate / 12,
+            rate=self.interest_rate_pcnt / 12,
             per=periods,
             nper=self.length_years * 12,
             pv=loan_amount,
@@ -66,7 +68,7 @@ class Mortgage:
         ]  # FIXME: I don't understand why we need [1:], but element [0], and therefore sum(), is wrong.
 
         interest_payment = -npf.ipmt(
-            rate=self.interest_rate / 12,
+            rate=self.interest_rate_pcnt / 12,
             per=periods,
             nper=self.length_years * 12,
             pv=loan_amount,

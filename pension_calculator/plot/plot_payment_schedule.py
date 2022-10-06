@@ -158,11 +158,11 @@ def plot():
         f"Born: {passive.person.yob}, "
         f"Retire: {passive.person.yor}, "
         f"House cost: £{passive.house.purchase_cost / 1000:1.0f}K, "
-        f"{passive.mortgage.interest_rate * 100}%/{passive.mortgage.length_years}y "
+        f"{passive.mortgage.interest_rate_pcnt * 100}%/{passive.mortgage.length_years}y "
         f"Mortgage, Area: {passive.house.area_m2}m2, "
         f"Energy Tariff: {passive.energy.tariff * 100}p/kWh, "
-        f"Energy CAGR: {passive.energy.cagr * 100:1.0f}%, "
-        f"Pension CAGR: {passive.pension.growth_rate * 100:1.0f}%"
+        f"Energy CAGR: {passive.energy.cagr_pcnt * 100:1.0f}%, "
+        f"Pension CAGR: {passive.pension.growth_rate_pcnt * 100:1.0f}%"
     )
     annotate_subtitle(ax1, subtitle_text)
     annotate_copyright(ax3)

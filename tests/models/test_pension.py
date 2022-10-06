@@ -7,7 +7,7 @@ def test_annual_payment(pension):
     # when I calculate the annual saving payment
     # then it produces the target amount
     nper = pension.end_year - pension.start_year
-    actual_fv = npf.fv(pension.growth_rate, nper, -pension.annual_payment, 0)
+    actual_fv = npf.fv(pension.growth_rate_pcnt, nper, -pension.annual_payment, 0)
     assert actual_fv == approx(pension.target)
 
 

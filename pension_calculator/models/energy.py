@@ -23,7 +23,7 @@ class Energy:
     """
 
     tariff: float
-    cagr: float
+    cagr_pcnt: float
 
     def annual_energy_cost(self, house_kwh_m2a: float, house_area_m2: float) -> float:
         """Compute the annual energy cost of a house with the given area and heating energy demand.
@@ -63,7 +63,7 @@ class Energy:
             house_kwh_m2a=house_kwh_m2a, house_area_m2=house_area_m2
         )
         payments = [
-            initial_payment * pow(1 + self.cagr, period) for period in range(years)
+            initial_payment * pow(1 + self.cagr_pcnt, period) for period in range(years)
         ]
 
         return pd.Series(data=payments, index=range(first_year, last_year + 1))

@@ -17,10 +17,10 @@ class House:
 
     purchase_year: int
     purchase_cost: float
-    passive_house_premium: float
+    passive_house_premium_pcnt: float
     area_m2: float
     annual_heating_kwh_m2a: float
 
     def total_cost(self) -> float:
         """Compute the total cost of the house including additional passive house costs."""
-        return self.purchase_cost * (1 + self.passive_house_premium)
+        return self.purchase_cost * (1 + self.passive_house_premium_pcnt)

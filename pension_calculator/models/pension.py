@@ -20,7 +20,7 @@ class Pension:
     """
 
     target: Optional[float]
-    growth_rate: float
+    growth_rate_pcnt: float
     start_year: int
     end_year: int
 
@@ -36,11 +36,13 @@ class Pension:
         duration_years = self.end_year - self.start_year
         amount = (
             self.target
-            * self.growth_rate
-            / (pow(1 + self.growth_rate, duration_years) - 1)
+            * self.growth_rate_pcnt
+            / (pow(1 + self.growth_rate_pcnt, duration_years) - 1)
         )
 
-        value = npf.fv(self.growth_rate, range(duration_years), 0, -amount).cumsum()
+        value = npf.fv(
+            self.growth_rate_pcnt, range(duration_years), 0, -amount
+        ).cumsum()
 
         return pd.DataFrame(
             data={"payment": np.full(duration_years, amount), "value": value},
