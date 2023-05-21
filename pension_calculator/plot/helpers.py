@@ -234,7 +234,7 @@ def annotate_subtitle(ax, text: str):
     ax.annotate(
         text,
         (0, 0),
-        (20, 525),
+        (20, 510),
         xycoords="figure points",
         textcoords="offset pixels",
         va="top",

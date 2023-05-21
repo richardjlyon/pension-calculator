@@ -42,7 +42,7 @@ def plot():
 
     fig = plt.figure()
     width_inches = 10
-    height_inches = width_inches * 9 / 16
+    height_inches = width_inches * 700 / 1280
     fig.set_size_inches(width_inches, height_inches)
     fig.patch.set_facecolor("white")
     fig.suptitle(
